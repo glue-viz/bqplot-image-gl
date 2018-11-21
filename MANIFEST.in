@@ -1,0 +1,2 @@
+recursive-include ipyastroimage/static *.*
+include jupyter-astroimage.json
