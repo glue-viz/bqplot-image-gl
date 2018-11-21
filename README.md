@@ -1,7 +1,7 @@
 ipyastroimage
 ===============================
 
-An ipywidget image widget for astronomical purposes
+An ipywidget image widget for mainly astronomical purposes. Used for https://github.com/glue-viz/glue-jupyter
 
 Installation
 ------------
@@ -9,7 +9,6 @@ Installation
 To install use pip:
 
     $ pip install ipyastroimage
-    $ jupyter nbextension enable --py --sys-prefix ipyastroimage
 
 
 For a development installation (requires npm),
