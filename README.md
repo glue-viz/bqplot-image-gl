@@ -3,6 +3,8 @@ ipyastroimage
 
 An ipywidget image widget for mainly astronomical purposes. Used for https://github.com/glue-viz/glue-jupyter
 
+(currently requires master bqplot version)
+
 Installation
 ------------
 
