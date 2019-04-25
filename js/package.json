@@ -17,7 +17,8 @@
   ],
   "files": [
     "lib/**/*.js",
-    "dist/*.js"
+    "dist/*.js",
+    "shaders/*"
   ],
   "scripts": {
     "clean": "rimraf dist/",
