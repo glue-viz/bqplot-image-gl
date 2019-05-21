@@ -9,12 +9,12 @@ var interpolations = {'nearest': THREE.NearestFilter, 'bilinear': THREE.LinearFi
 var jupyter_dataserializers = require("jupyter-dataserializers");
 var serialize = require("./serialize");
 
-var AstroImageModel = bqplot.MarkModel.extend({
+var ImageGLModel = bqplot.MarkModel.extend({
 
     defaults: function() {
         return _.extend(bqplot.MarkModel.prototype.defaults(), {
-            _model_name : 'AstroImageModel',
-            _view_name : 'AstroImageView',
+            _model_name : 'ImageGLModel',
+            _view_name : 'ImageGLView',
             _model_module : 'bqplot-image-gl',
             _view_module : 'bqplot-image-gl',
             _model_module_version : '0.1.0',
@@ -31,7 +31,7 @@ var AstroImageModel = bqplot.MarkModel.extend({
     },
 
     initialize: function() {
-        AstroImageModel.__super__.initialize.apply(this, arguments);
+        ImageGLModel.__super__.initialize.apply(this, arguments);
         this.on_some_change(['x', 'y'], this.update_data, this);
         this.on_some_change(["preserve_domain"], this.update_domains, this);
         this.update_data();
@@ -81,10 +81,10 @@ var AstroImageModel = bqplot.MarkModel.extend({
 });
 
 
-var AstroImageView = bqplot.Mark.extend({
+var ImageGLView = bqplot.Mark.extend({
 
     render: function() {
-        var base_render_promise = AstroImageView.__super__.render.apply(this);
+        var base_render_promise = ImageGLView.__super__.render.apply(this);
         window.last_image = this;
 
         this.image_plane = new THREE.PlaneBufferGeometry( 1.0, 1.0 );
@@ -175,7 +175,7 @@ var AstroImageView = bqplot.Mark.extend({
     },
 
     create_listeners: function() {
-        AstroImageView.__super__.create_listeners.apply(this);
+        ImageGLView.__super__.create_listeners.apply(this);
         this.listenTo(this.model, "change:interpolation", () => {
             if(!this.texture)
                 return;
@@ -260,7 +260,7 @@ var AstroImageView = bqplot.Mark.extend({
         if(data instanceof Uint8Array) {
             type =  THREE.UnsignedByteType;
         } else if(data instanceof Float64Array) {
-            console.warn('AstroImageView.data is a Float64Array which WebGL does not support, will convert to a Float32Array (consider sending float32 data for better performance).')
+            console.warn('ImageGLView.data is a Float64Array which WebGL does not support, will convert to a Float32Array (consider sending float32 data for better performance).')
             data = Float32Array.from(data)
             type =  THREE.FloatType;
         } else if(data instanceof Float32Array) {
@@ -363,6 +363,6 @@ var ImageMark = widgets.DOMWidgetModel.extend({
 
 
 module.exports = {
-    AstroImageModel : AstroImageModel,
-    AstroImageView  : AstroImageView
+    ImageGLModel : ImageGLModel,
+    ImageGLView  : ImageGLView
 };

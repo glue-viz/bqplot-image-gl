@@ -8,10 +8,10 @@ from traitlets import (Int, Unicode, List, Enum, Dict, Bool, Float,
 from bqplot.marks import shape
 
 @widgets.register
-class AstroImage(bqplot.Mark):
+class ImageGL(bqplot.Mark):
     """An example widget."""
-    _view_name = Unicode('AstroImageView').tag(sync=True)
-    _model_name = Unicode('AstroImageModel').tag(sync=True)
+    _view_name = Unicode('ImageGLView').tag(sync=True)
+    _model_name = Unicode('ImageGLModel').tag(sync=True)
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
     _view_module_version = Unicode('^0.1.0').tag(sync=True)
