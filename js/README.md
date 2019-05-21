@@ -7,5 +7,5 @@ Package Install
 - [node](http://nodejs.org/)
 
 ```bash
-npm install --save jupyter-astroimage
+npm install --save bqplot-image-gl
 ```

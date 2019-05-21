@@ -6,6 +6,6 @@ def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
         'src': 'static',
-        'dest': 'jupyter-astroimage',
-        'require': 'jupyter-astroimage/extension'
+        'dest': 'bqplot-image-gl',
+        'require': 'bqplot-image-gl/extension'
     }]

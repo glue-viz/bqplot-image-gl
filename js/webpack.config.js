@@ -20,7 +20,7 @@ module.exports = [
         entry: './lib/extension.js',
         output: {
             filename: 'extension.js',
-            path: path.resolve(__dirname, '..', 'ipyastroimage', 'static'),
+            path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
             libraryTarget: 'amd'
         }
     },
@@ -33,7 +33,7 @@ module.exports = [
         entry: './lib/index.js',
         output: {
             filename: 'index.js',
-            path: path.resolve(__dirname, '..', 'ipyastroimage', 'static'),
+            path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
             libraryTarget: 'amd'
         },
         devtool: 'source-map',
@@ -42,7 +42,7 @@ module.exports = [
         },
         externals: ['@jupyter-widgets/base']
     },
-    {// Embeddable jupyter-astroimage bundle
+    {// Embeddable bqplot-image-gl bundle
      //
      // This bundle is generally almost identical to the notebook bundle
      // containing the custom widget views and models.
@@ -61,7 +61,7 @@ module.exports = [
             filename: 'index.js',
             path: path.resolve(__dirname, 'dist'),
             libraryTarget: 'amd',
-            publicPath: 'https://unpkg.com/jupyter-astroimage@' + version + '/dist/'
+            publicPath: 'https://unpkg.com/bqplot-image-gl@' + version + '/dist/'
         },
         devtool: 'source-map',
         module: {

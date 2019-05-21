@@ -1,16 +1,15 @@
-var jupyter_astroimage = require('./astroimage');
+var bqplot_gl_image = require('./astroimage');
 var base = require('@jupyter-widgets/base');
 
 module.exports = {
-  id: 'jupyter-astroimage',
+  id: 'bqplot-image-gl',
   requires: [base.IJupyterWidgetRegistry],
   activate: function(app, widgets) {
       widgets.registerWidget({
-          name: 'jupyter-astroimage',
-          version: jupyter_astroimage.version,
-          exports: jupyter_astroimage
+          name: 'bqplot-image-gl',
+          version: bqplot_gl_image.version,
+          exports: bqplot_gl_image
       });
   },
   autoStart: true
 };
-

@@ -5,7 +5,7 @@
 // Some static assets may be required by the custom widget javascript. The base
 // url for the notebook is not known at build time and is therefore computed
 // dynamically.
-__webpack_public_path__ = document.querySelector('body').getAttribute('data-base-url') + 'nbextensions/jupyter-astroimage';
+__webpack_public_path__ = document.querySelector('body').getAttribute('data-base-url') + 'nbextensions/bqplot-image-gl';
 
 
 // Configure requirejs
@@ -13,7 +13,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*" : {
-                "jupyter-astroimage": "nbextensions/jupyter-astroimage/index",
+                "bqplot-image-gl": "nbextensions/bqplot-image-gl/index",
             }
         }
     });

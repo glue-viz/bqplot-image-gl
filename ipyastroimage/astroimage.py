@@ -12,8 +12,8 @@ class AstroImage(bqplot.Mark):
     """An example widget."""
     _view_name = Unicode('AstroImageView').tag(sync=True)
     _model_name = Unicode('AstroImageModel').tag(sync=True)
-    _view_module = Unicode('jupyter-astroimage').tag(sync=True)
-    _model_module = Unicode('jupyter-astroimage').tag(sync=True)
+    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
     _view_module_version = Unicode('^0.1.0').tag(sync=True)
     _model_module_version = Unicode('^0.1.0').tag(sync=True)
 

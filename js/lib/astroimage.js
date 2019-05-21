@@ -15,8 +15,8 @@ var AstroImageModel = bqplot.MarkModel.extend({
         return _.extend(bqplot.MarkModel.prototype.defaults(), {
             _model_name : 'AstroImageModel',
             _view_name : 'AstroImageView',
-            _model_module : 'jupyter-astroimage',
-            _view_module : 'jupyter-astroimage',
+            _model_module : 'bqplot-image-gl',
+            _view_module : 'bqplot-image-gl',
             _model_module_version : '0.1.0',
             _view_module_version : '0.1.0',
             interpolation: 'nearest',
@@ -353,8 +353,8 @@ var ImageMark = widgets.DOMWidgetModel.extend({
     defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
         _model_name : 'ImageMark',
         _view_name : 'HelloView',
-        _model_module : 'jupyter-astroimage',
-        _view_module : 'jupyter-astroimage',
+        _model_module : 'bqplot-image-gl',
+        _view_module : 'bqplot-image-gl',
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
         value : 'Hello World'

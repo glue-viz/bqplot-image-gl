@@ -1,12 +1,12 @@
 {
-  "name": "jupyter-astroimage",
+  "name": "bqplot-image-gl",
   "version": "0.1.0",
   "description": "An ipywidget image widget for astronomical purposes",
   "author": "Maarten A. Breddels",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/glue-viz/ipyastroimage.git"
+    "url": "https://github.com/glue-viz/bqplot-image-gl.git"
   },
   "keywords": [
     "jupyter",

@@ -1,22 +1,22 @@
-ipyastroimage
-===============================
+bqplot-image-gl
+===============
 
-An ipywidget image widget for mainly astronomical purposes. Used for https://github.com/glue-viz/glue-jupyter
+An ipywidget image widget for showing images in bqplot using WebGL.
+Used for https://github.com/glue-viz/glue-jupyter
 
-(currently requires master bqplot version)
+(currently requires latest developer version of bqplot)
 
 Installation
 ------------
 
 To install use pip:
 
-    $ pip install ipyastroimage
-
+    $ pip install bqplot-image-gl
 
 For a development installation (requires npm),
 
-    $ git clone https://github.com/glue-viz/ipyastroimage.git
-    $ cd ipyastroimage
+    $ git clone https://github.com/glue-viz/bqplot-image-gl.git
+    $ cd bqplot-image-gl
     $ pip install -e .
-    $ jupyter nbextension install --py --symlink --sys-prefix ipyastroimage
-    $ jupyter nbextension enable --py --sys-prefix ipyastroimage
+    $ jupyter nbextension install --py --symlink --sys-prefix bqplot_image_gl
+    $ jupyter nbextension enable --py --sys-prefix bqplot_image_gl

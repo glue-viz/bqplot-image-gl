@@ -66,8 +66,8 @@ class NPM(Command):
     node_modules = os.path.join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'ipyastroimage', 'static', 'extension.js'),
-        os.path.join(here, 'ipyastroimage', 'static', 'index.js')
+        os.path.join(here, 'bqplot_image_gl', 'static', 'extension.js'),
+        os.path.join(here, 'bqplot_image_gl', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -80,9 +80,9 @@ class NPM(Command):
         npmName = 'npm';
         if platform.system() == 'Windows':
             npmName = 'npm.cmd';
-            
+
         return npmName;
-    
+
     def has_npm(self):
         npmName = self.get_npm_name();
         try:
@@ -121,22 +121,22 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(os.path.join(here, 'ipyastroimage', '_version.py')) as f:
+with open(os.path.join(here, 'bqplot_image_gl', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup_args = {
-    'name': 'ipyastroimage',
+    'name': 'bqplot-image-gl',
     'version': version_ns['__version__'],
     'description': 'An ipywidget image widget for astronomical purposes',
     'long_description': LONG_DESCRIPTION,
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/jupyter-astroimage', [
-            'ipyastroimage/static/extension.js',
-            'ipyastroimage/static/index.js',
-            'ipyastroimage/static/index.js.map',
+        ('share/jupyter/nbextensions/bqplot-image-gl', [
+            'bqplot_image_gl/static/extension.js',
+            'bqplot_image_gl/static/index.js',
+            'bqplot_image_gl/static/index.js.map',
         ],),
-        ('etc/jupyter/nbconfig/notebook.d/' ,['jupyter-astroimage.json'])
+        ('etc/jupyter/nbconfig/notebook.d/' ,['bqplot-image-gl.json'])
     ],
     'install_requires': [
         'ipywidgets>=7.0.0',
@@ -152,7 +152,7 @@ setup_args = {
 
     'author': 'Maarten A. Breddels',
     'author_email': 'maartenbreddels@gmail.com',
-    'url': 'https://github.com/glue-viz/ipyastroimage',
+    'url': 'https://github.com/glue-viz/bqplot-image-gl',
     'keywords': [
         'ipython',
         'jupyter',

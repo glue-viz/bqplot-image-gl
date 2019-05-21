@@ -1,2 +1,2 @@
-recursive-include ipyastroimage/static *.*
-include jupyter-astroimage.json
+recursive-include bqplot_image_gl/static *.*
+include bqplot_image_gl.json
