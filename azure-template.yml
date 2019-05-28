@@ -1,0 +1,33 @@
+parameters:
+  display: ''
+
+jobs:
+- job: ${{ format(parameters.name) }}
+  pool:
+    ${{ if eq(parameters.os, 'macosx') }}:
+      vmImage: macOS 10.13
+    ${{ if eq(parameters.os, 'linux') }}:
+      vmImage: Ubuntu 16.04
+    ${{ if eq(parameters.os, 'windows') }}:
+      vmImage: vs2017-win2016
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python35:
+        python.version: '3.5'
+      Python37:
+        python.version: '3.7'
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: pip install .
+    displayName: Installing package
+
+  - script: python .check_extension.py
+    displayName: Check that extension works
