@@ -136,7 +136,7 @@ setup_args = {
             'bqplot_image_gl/static/index.js',
             'bqplot_image_gl/static/index.js.map',
         ],),
-        ('etc/jupyter/nbconfig/notebook.d/' ,['bqplot-image-gl.json'])
+        ('etc/jupyter/nbconfig/notebook.d' ,['bqplot-image-gl.json'])
     ],
     'install_requires': [
         'ipywidgets>=7.0.0',
