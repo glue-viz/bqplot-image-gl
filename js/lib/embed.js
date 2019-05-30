@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 // Entry point for the unpkg bundle containing custom model definitions.
 //
 // It differs from the notebook bundle in that it does not need to define a
@@ -6,4 +8,4 @@
 
 // Export widget models and views, and the npm package version number.
 module.exports = require('./imagegl.js');
-module.exports['version'] = require('../package.json').version;
+module.exports.version = require('../package.json').version;
