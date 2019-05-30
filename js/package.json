@@ -38,7 +38,8 @@
     "three": "^0.91.0",
     "bqplot": "^0.5.0-alpha.0",
     "is-typedarray": "^1.0.0",
-    "jupyter-dataserializers": "^1.1.2"
+    "jupyter-dataserializers": "^1.1.2",
+    "raw-loader": "^0.5.1"
   },
   "jupyterlab": {
     "extension": "lib/labplugin"

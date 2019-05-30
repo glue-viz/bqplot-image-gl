@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 var bqplot_gl_image = require('./index');
 var base = require('@jupyter-widgets/base');
 

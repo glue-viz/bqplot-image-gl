@@ -1,4 +1,6 @@
-var _ = require('underscore')
+/*jshint esversion: 6 */
+
+var _ = require('underscore');
 var isTypedArray = require('is-typedarray');
 
 var typesToArray = {
@@ -10,7 +12,7 @@ var typesToArray = {
     uint32: Uint32Array,
     float32: Float32Array,
     float64: Float64Array
-}
+};
 
 var arrayToTypes = {
     Int8Array: 'int8',
@@ -21,28 +23,28 @@ var arrayToTypes = {
     Uint32Array: 'uint32',
     Float32Array: 'float32',
     Float64Array: 'float64'
-}
+};
 
 
 function deserialize_typed_array(data, manager) {
     var type = typesToArray[data.dtype];
     if(data == null) {
-        console.log('data is null')
+        console.log('data is null');
     }
     if(!data.value) {
-        console.log('data.buffer is null')
+        console.log('data.buffer is null');
     }
     if(!data.value.buffer) {
-        console.log('data.buffer is null')
+        console.log('data.buffer is null');
     }
     var ar = new type(data.value.buffer);
     ar.type = data.type;
     if(data.shape && data.shape.length >= 2) {
         if(data.shape.length > 2)
-            throw new Error("only arrays with rank 1 or 2 supported")
+            throw new Error("only arrays with rank 1 or 2 supported");
         var offset = 0;
         var shape = data.shape;
-        var arrays = []
+        var arrays = [];
         // slice the 1d typed arrays in multiple arrays and put them in a
         // regular array
         for(var i=0; i < data.shape[0]; i++) {
@@ -56,14 +58,14 @@ function deserialize_typed_array(data, manager) {
 
 function serialize_typed_array(ar, manager) {
     if(ar == null) {
-        console.log('data is null')
+        console.log('data is null');
     }
     if(!ar.buffer) {
-        console.log('ar.buffer is null or not defined')
+        console.log('ar.buffer is null or not defined');
     }
     var dtype = arrayToTypes[ar.constructor.name];
     var type = ar.type || null;
-    var wire = {dtype: dtype, value: new DataView(ar.buffer), shape: [ar.length], type: type}
+    var wire = {dtype: dtype, value: new DataView(ar.buffer), shape: [ar.length], type: type};
     return wire;
 }
 /*
@@ -96,18 +98,18 @@ function deserialize_array_or_json(data, manager) {
     }
     else if(_.isArray(data)) {
         if(data.length == 0) {
-            arrays = []
+            arrays = [];
         } else {
             if(_.isArray(data[0])) { // 2d array
-                value = _.map(data, function(data1d) { return deserialize_array_or_json(data1d, manager)})
+                value = _.map(data, function(data1d) { return deserialize_array_or_json(data1d, manager);});
             } else { // it contains a plain array most likely
                 value = data;
             }
         }
     } else if(data.value && data.dtype) { // binary data
-        value = deserialize_typed_array(data)
+        value = deserialize_typed_array(data);
     } else {
-        console.error('not sure what the data is')
+        console.error('not sure what the data is');
     }
     return value;
 }
@@ -118,13 +120,13 @@ function serialize_array_or_json(data, manager) {
     if(_.isNumber(data)) {
         return data; // return numbers directly
     } else if(_.isArray(data)) {
-        return data.map((ar) => serialize_array_or_json(ar, manager))
+        return data.map((ar) => serialize_array_or_json(ar, manager));
     } else if(isTypedArray(data)) {
-        return serialize_typed_array(data, manager)
+        return serialize_typed_array(data, manager);
     }
 }
 
 module.exports = {
     array_or_json: { deserialize: deserialize_array_or_json, serialize: serialize_array_or_json },
     //ndarray: { deserialize: deserialize_ndarray, serialize: serialize_ndarray },
-}
+};
