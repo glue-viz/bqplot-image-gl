@@ -1,4 +1,4 @@
-var bqplot_gl_image = require('./imagegl');
+var bqplot_gl_image = require('./index');
 var base = require('@jupyter-widgets/base');
 
 module.exports = {
