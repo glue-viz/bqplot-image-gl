@@ -39,3 +39,21 @@ class ImageGL(bqplot.Mark):
         'y': {'orientation': 'vertical', 'dimension': 'y'},
         'image': {'dimension': 'color'},
     }).tag(sync=True)
+
+
+@widgets.register
+class Contour(bqplot.Mark):
+    _view_name = Unicode('ContourView').tag(sync=True)
+    _model_name = Unicode('ContourModel').tag(sync=True)
+    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _view_module_version = Unicode('^0.2.0').tag(sync=True)
+    _model_module_version = Unicode('^0.2.0').tag(sync=True)
+
+    image = Instance(ImageGL).tag(sync=True, **widgets.widget_serialization)
+    level = Float().tag(sync=True)
+    color = widgets.Color('orange').tag(sync=True)
+    scales_metadata = Dict({
+        'x': {'orientation': 'horizontal', 'dimension': 'x'},
+        'y': {'orientation': 'vertical', 'dimension': 'y'},
+    }).tag(sync=True)
