@@ -51,7 +51,7 @@ class Contour(bqplot.Mark):
     _model_module_version = Unicode('^0.2.0').tag(sync=True)
 
     image = Instance(ImageGL).tag(sync=True, **widgets.widget_serialization)
-    level = Float().tag(sync=True)
+    level = (Float() | List(Float())).tag(sync=True)
     color = widgets.Color(None, allow_none=True).tag(sync=True)
     scales_metadata = Dict({
         'x': {'orientation': 'horizontal', 'dimension': 'x'},
