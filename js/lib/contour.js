@@ -3,6 +3,7 @@ import * as widgets from "@jupyter-widgets/base";
 import * as d3contour from "d3-contour";
 import * as d3geo from "d3-geo";
 import * as d3 from "d3";
+import * as jupyter_dataserializers from "jupyter-dataserializers";
 
 
 class ContourModel extends bqplot.MarkModel {
@@ -27,25 +28,44 @@ class ContourModel extends bqplot.MarkModel {
 
     initialize(attributes, options) {
         super.initialize(attributes, options);
-        this.on_some_change(['level'], this.update_data, this);
+        this.on_some_change(['level', 'contour_lines'], this.update_data, this);
         this.on_some_change(["preserve_domain"], this.update_domains, this);
         this.update_data();
     }
 
     update_data() {
         const image_widget = this.get('image');
-        const image = image_widget.get('image')
-        this.width = image.shape[1];
-        this.height = image.shape[0];
         const level = this.get('level')
         // we support a single level or multiple
         this.thresholds = Array.isArray(level) ? level : [level];
-        this.contours = this.thresholds.map((threshold) => d3contour
-                                            .contours()
-                                            .size([this.width, this.height])
-                                            .contour(image.data, [threshold])
-                            )
-        // this.update_domains();
+        if(image_widget) {
+                const image = image_widget.get('image')
+                this.width = image.shape[1];
+                this.height = image.shape[0];
+                this.contours = this.thresholds.map((threshold) => d3contour
+                                                    .contours()
+                                                    .size([this.width, this.height])
+                                                    .contour(image.data, [threshold])
+                                                    )
+        } else {
+            this.width = 1;   // precomputed contour_lines will have to be in normalized
+            this.height = 1;  // coordinates.
+            const contour_lines = this.get('contour_lines');
+            this.contours = contour_lines.map((contour_line_set) => {
+                return {
+                    type: 'MultiLineString',
+                    coordinates: contour_line_set.map((contour_line) => {
+                        // this isn't really efficient, if we do real WebGL rendering
+                        // we may keep this as typed array
+                        var values = [];
+                        for(var i = 0; i < contour_line.size/2; i++) {
+                            values.push([contour_line.get(i, 0), contour_line.get(i, 1)])
+                        }
+                        return values;
+                    })
+                }
+            })
+        }
         this.trigger("data_updated");
     }
 
@@ -77,6 +97,9 @@ class ContourModel extends bqplot.MarkModel {
 class ContourView extends bqplot.Mark {
     create_listeners() {
         super.create_listeners();
+        this.listenTo(this.model, "change:label_steps", () => {
+            this.updateLabels()
+        })
         this.listenTo(this.model, "change:color", () => {
             // TODO: this is not efficient, but updateColor does not work as it is
             // this.updateColors()
@@ -180,14 +203,17 @@ class ContourView extends bqplot.Mark {
         this.model.contours.forEach((contour, index) => {
             const color = this.getColor(model.thresholds[index], index);
             const label = String(model.thresholds[index]);
-            // return
                 // http://wiki.geojson.org/GeoJSON_draft_version_6#MultiPolygon
-            contour.coordinates.forEach(polygon =>
+            const is_polygon = contour.type == 'MultiPolygon';
+            contour.coordinates.forEach(polygon => {
+                // a MultiPolygon is a list of rings
                 // http://wiki.geojson.org/GeoJSON_draft_version_6#Polygon
-                polygon.forEach((linear_ring, j) => {
-                    const points = linear_ring.slice(1);
+                const linestring_list = is_polygon ? polygon : [polygon]
+                linestring_list.forEach((line_list, j) => {
+                    // in the case of multipolygons, the beginning and end are the same.
+                    const points = is_polygon ? line_list.slice(1) : line_list;
                     var index = 0;
-                    const step = 40;
+                    const step = this.model.get('label_steps');
                     // transform image pixel to bqplot/svg pixel coordinates
                     const scalex = (_) => x_scale.scale(_/model.width)
                     const scaley = (_) => y_scale.scale(_/model.height)
@@ -203,13 +229,11 @@ class ContourView extends bqplot.Mark {
                         const dx = x_next - x_previous;
                         const dy = y_next - y_previous;
                         var label_angle = (Math.atan2(dy, dx) * 180 / Math.PI + 180) % 360;
-                        console.log('original angle', label_angle)
                         // if the label is upside down, we wanna rotate an extra 180 degrees
                         if(label_angle > 270)
                             label_angle = (label_angle + 180) % 360;
                         if(label_angle > 90)
                             label_angle = (label_angle + 180) % 360;
-                        console.log('modified angle', label_angle)
                         this.d3label_group
                             .append("text")
                             .text(label)
@@ -227,12 +251,21 @@ class ContourView extends bqplot.Mark {
                             break;
                     }
                 })
-            )
+            })
         })
     }
 }
 
-ContourModel.serializers = Object.assign({}, bqplot.MarkModel.serializers, {image: {deserialize: widgets.unpack_models}});
+ContourModel.serializers = Object.assign({}, bqplot.MarkModel.serializers, {
+    image: {deserialize: widgets.unpack_models},
+    contour_lines: {deserialize: (obj, manager) => {
+        return obj.map((countour_line_set) => countour_line_set.map((contour_line) => {
+            let state = {buffer: contour_line.value, dtype: contour_line.dtype, shape: contour_line.shape};
+            return jupyter_dataserializers.JSONToArray(state);
+
+        }));
+    }}
+});
 
 export {
     ContourModel, ContourView
