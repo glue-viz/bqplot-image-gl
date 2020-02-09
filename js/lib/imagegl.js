@@ -234,7 +234,7 @@ class ImageGLView extends bqplot.Mark {
     update_colormap() {
         // convert the d3 color scale to a texture
         var colors = this.scales.image.model.color_range;
-        var color_scale = d3.scale.linear()
+        var color_scale = d3.scaleLinear()
                                   .range(colors)
                                   .domain(_.range(colors.length).map((i) => i/(colors.length-1)));
         var colormap_array = [];
