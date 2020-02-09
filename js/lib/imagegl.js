@@ -109,8 +109,8 @@ class ImageGLView extends bqplot.Mark {
                         // extra opacity value
                         opacity: {type: 'f', value: 1.0}
                     },
-                    vertexShader: require('raw-loader!../shaders/image-vertex.glsl'),
-                    fragmentShader: require('raw-loader!../shaders/image-fragment.glsl'),
+                    vertexShader: require('raw-loader!../shaders/image-vertex.glsl').default,
+                    fragmentShader: require('raw-loader!../shaders/image-fragment.glsl').default,
                     transparent: true,
                     alphaTest: 0.01, // don't render almost fully transparant objects
                     blending: THREE.CustomBlending,
