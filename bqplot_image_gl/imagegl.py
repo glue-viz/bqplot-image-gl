@@ -14,8 +14,8 @@ class ImageGL(bqplot.Mark):
     _model_name = Unicode('ImageGLModel').tag(sync=True)
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^0.1.5').tag(sync=True)
-    _model_module_version = Unicode('^0.1.5').tag(sync=True)
+    _view_module_version = Unicode('^0.1.6').tag(sync=True)
+    _model_module_version = Unicode('^0.1.6').tag(sync=True)
 
     image = Array().tag(sync=True,
                         scaled=True,
