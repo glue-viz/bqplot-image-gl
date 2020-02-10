@@ -109,8 +109,8 @@ class ImageGLView extends bqplot.Mark {
                         // extra opacity value
                         opacity: {type: 'f', value: 1.0}
                     },
-                    vertexShader: require('raw-loader!../shaders/image-vertex.glsl'),
-                    fragmentShader: require('raw-loader!../shaders/image-fragment.glsl'),
+                    vertexShader: require('raw-loader!../shaders/image-vertex.glsl').default,
+                    fragmentShader: require('raw-loader!../shaders/image-fragment.glsl').default,
                     transparent: true,
                     alphaTest: 0.01, // don't render almost fully transparant objects
                     blending: THREE.CustomBlending,
@@ -234,7 +234,7 @@ class ImageGLView extends bqplot.Mark {
     update_colormap() {
         // convert the d3 color scale to a texture
         var colors = this.scales.image.model.color_range;
-        var color_scale = d3.scale.linear()
+        var color_scale = d3.scaleLinear()
                                   .range(colors)
                                   .domain(_.range(colors.length).map((i) => i/(colors.length-1)));
         var colormap_array = [];
