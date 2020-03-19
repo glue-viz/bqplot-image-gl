@@ -362,7 +362,6 @@ var ImageMark = widgets.DOMWidgetModel.extend({
 });
 
 
-module.exports = {
-    ImageGLModel : ImageGLModel,
-    ImageGLView  : ImageGLView
+export {
+    ImageGLModel, ImageGLView
 };
