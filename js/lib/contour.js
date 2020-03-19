@@ -124,7 +124,7 @@ class ContourView extends bqplot.Mark {
             return this.model.get('color');
         const model = this.model;
         var colors = this.scales.image.model.color_range;
-        var color_scale = d3.scale.linear()
+        var color_scale = d3.scaleLinear()
                                   .range(colors)
                                   .domain(this.scales.image.model.domain);
         const min = this.scales.image.model.domain[0];
