@@ -40,7 +40,7 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base']
+        externals: ['@jupyter-widgets/base', 'bqplot']
     },
     {// Embeddable bqplot-image-gl bundle
      //
@@ -67,6 +67,6 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base']
+        externals: ['@jupyter-widgets/base', 'bqplot']
     }
 ];
