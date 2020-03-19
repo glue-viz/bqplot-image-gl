@@ -14,8 +14,8 @@ class ContourModel extends bqplot.MarkModel {
             _view_name : 'ContourView',
             _model_module : 'bqplot-image-gl',
             _view_module : 'bqplot-image-gl',
-            _model_module_version : '0.2.0',
-            _view_module_version : '0.2.0',
+            _model_module_version : '0.3.0',
+            _view_module_version : '0.3.0',
             image: null,
             level: null,
             color: null,
@@ -153,7 +153,7 @@ class ContourView extends bqplot.Mark {
         promise.then(() => {
             this.draw()
             this.create_listeners();
-                  
+
         })
         return promise;
     }

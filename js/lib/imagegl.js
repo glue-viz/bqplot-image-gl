@@ -19,8 +19,8 @@ class ImageGLModel extends bqplot.MarkModel {
             _view_name : 'ImageGLView',
             _model_module : 'bqplot-image-gl',
             _view_module : 'bqplot-image-gl',
-            _model_module_version : '0.2.0',
-            _view_module_version : '0.2.0',
+            _model_module_version : '0.3.0',
+            _view_module_version : '0.3.0',
             interpolation: 'nearest',
             opacity: 1.0,
             x: (0.0, 1.0),
@@ -355,8 +355,8 @@ var ImageMark = widgets.DOMWidgetModel.extend({
         _view_name : 'HelloView',
         _model_module : 'bqplot-image-gl',
         _view_module : 'bqplot-image-gl',
-        _model_module_version : '0.2.0',
-        _view_module_version : '0.2.0',
+        _model_module_version : '0.3.0',
+        _view_module_version : '0.3.0',
         value : 'Hello World'
     })
 });
