@@ -1,4 +1,5 @@
 var path = require('path');
+var webpack = require('webpack');
 var version = require('./package.json').version;
 
 // Custom webpack rules are generally the same for all webpack bundles, hence
@@ -34,13 +35,14 @@ module.exports = [
         output: {
             filename: 'index.js',
             path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
-            libraryTarget: 'amd'
+            libraryTarget: 'amd',
+            devtoolModuleFilenameTemplate: 'webpack://bqplot-image-gl/[namespace]/[resource-path]?[loaders]',
         },
         devtool: 'source-map',
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base']
+        externals: ['@jupyter-widgets/base', 'bqplot']
     },
     {// Embeddable bqplot-image-gl bundle
      //
@@ -67,6 +69,6 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base']
+        externals: ['@jupyter-widgets/base', 'bqplot']
     }
 ];
