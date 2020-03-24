@@ -1,5 +1,7 @@
-from bqplot.interacts import BrushSelector
-from traitlets import Float, Unicode, Dict
+from bqplot.interacts import BrushSelector, Interaction
+from bqplot.scales import Scale
+from traitlets import Float, Unicode, Dict, Instance
+from ipywidgets.widgets.widget import widget_serialization
 
 class BrushEllipseSelector(BrushSelector):
 
@@ -47,3 +49,43 @@ class BrushEllipseSelector(BrushSelector):
                          "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
     _view_name = Unicode('BrushEllipseSelector').tag(sync=True)
     _model_name = Unicode('BrushEllipseSelectorModel').tag(sync=True)
+
+
+class MouseInteraction(Interaction):
+    """Mouse events listener.
+
+    Listen for mouse events on the kernel side.
+    The attributes 'x_scale' and 'y_scale' should be provided.
+
+    Event being passed are
+        * dragstart
+        * dragmove
+        * dragend
+        * click
+        * dblclick
+
+    All events are passed by a custom event with the following spec:
+    `{event: <name>, pixel: {x: <pixel x>, y: <pixel y>}, domain: {x: <x>, y: <y>}} `
+
+    Pixel coordinates might be useful for debugging, domain coordinates should be used only.
+
+    Attributes
+    ----------
+    x_scale: An instance of Scale
+        This is the scale which is used for inversion from the pixels to data
+        co-ordinates in the x-direction.
+    y_scale: An instance of Scale
+        This is the scale which is used for inversion from the pixels to data
+        co-ordinates in the y-direction.
+    """
+    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _view_module_version = Unicode('^0.2.0').tag(sync=True)
+    _model_module_version = Unicode('^0.2.0').tag(sync=True)
+    _view_name = Unicode('MouseInteraction').tag(sync=True)
+    _model_name = Unicode('MouseInteractionModel').tag(sync=True)
+    x_scale = Instance(Scale, allow_none=True, default_value=None)\
+        .tag(sync=True, dimension='x', **widget_serialization)
+    y_scale = Instance(Scale, allow_none=True, default_value=None)\
+        .tag(sync=True, dimension='y', **widget_serialization)
+    cursor = Unicode('auto').tag(sync=True)
