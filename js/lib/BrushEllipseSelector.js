@@ -84,6 +84,12 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style', () => this.updateEllipse());
         this.listenTo(this.model, 'change:selected_x change:selected_y', this.syncSelectionToMarks);
     }
+    remove() {
+        super.remove()
+        // detach the event listener for dragging, since they are attached to the parent
+        const bg_events = d3.select(this.parent.bg_events.node())
+        bg_events.on(".start .drag .end", null);
+    }
     // these methods are not private, but are used for testing, they should not be used as a public API.
     _brushStart({ x, y }) {
         console.log('start', x, y);
