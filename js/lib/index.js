@@ -5,4 +5,5 @@ export * from "./imagegl.js";
 export * from "./contour.js";
 export * from './BrushEllipseSelectorModel';
 export * from './BrushEllipseSelector';
+export * from './MouseInteraction'
 export const version = require('../package.json').version;
