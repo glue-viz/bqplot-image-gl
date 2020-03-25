@@ -15,8 +15,8 @@ class ImageGL(bqplot.Mark):
     _model_name = Unicode('ImageGLModel').tag(sync=True)
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^0.3.0').tag(sync=True)
-    _model_module_version = Unicode('^0.3.0').tag(sync=True)
+    _view_module_version = Unicode('^0.4.0').tag(sync=True)
+    _model_module_version = Unicode('^0.4.0').tag(sync=True)
 
     image = Array().tag(sync=True,
                         scaled=True,
@@ -61,8 +61,8 @@ class Contour(bqplot.Mark):
     _model_name = Unicode('ContourModel').tag(sync=True)
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^0.3.0').tag(sync=True)
-    _model_module_version = Unicode('^0.3.0').tag(sync=True)
+    _view_module_version = Unicode('^0.4.0').tag(sync=True)
+    _model_module_version = Unicode('^0.4.0').tag(sync=True)
 
     image = Instance(ImageGL, allow_none=True).tag(sync=True, **widgets.widget_serialization)
     label_steps = Int(40).tag(sync=True)
