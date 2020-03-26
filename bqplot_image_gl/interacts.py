@@ -2,7 +2,7 @@ from bqplot.interacts import BrushSelector, Interaction
 from bqplot.scales import Scale
 from traitlets import Float, Unicode, Dict, Instance
 from ipywidgets.widgets.widget import widget_serialization
-from bqplot_image_gl.version import __version__
+from bqplot_image_gl._version import __version__
 
 
 class BrushEllipseSelector(BrushSelector):
