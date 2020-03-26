@@ -1,12 +1,13 @@
 import ipywidgets as widgets
-from traitlets import Unicode
 import bqplot
 from traittypes import Array
 from bqplot.traits import (array_serialization, array_squeeze)
-from traitlets import (Int, Unicode, List, Enum, Dict, Bool, Float,
-                       Instance, TraitError, validate)
+from traitlets import Int, Unicode, List, Dict, Float, Instance
 from bqplot.marks import shape
-from bqplot.traits import array_to_json
+from bqplot.traits import array_to_json, array_from_json
+
+__all__ = ['ImageGL', 'Contour']
+
 
 @widgets.register
 class ImageGL(bqplot.Mark):
@@ -42,7 +43,6 @@ class ImageGL(bqplot.Mark):
     }).tag(sync=True)
 
 
-
 def double_list_array_from_json(double_list):
     return [[array_from_json(k) for k in array_list] for array_list in double_list]
 
@@ -66,8 +66,8 @@ class Contour(bqplot.Mark):
 
     image = Instance(ImageGL, allow_none=True).tag(sync=True, **widgets.widget_serialization)
     label_steps = Int(40).tag(sync=True)
-    contour_lines = List(List(Array(None, allow_none=True))).tag(sync=True,
-        **double_list_array_serialization)
+    contour_lines = (List(List(Array(None, allow_none=True)))
+                     .tag(sync=True, **double_list_array_serialization))
     level = (Float() | List(Float())).tag(sync=True)
     color = widgets.Color(None, allow_none=True).tag(sync=True)
     scales_metadata = Dict({
