@@ -6,10 +6,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 for notebook in glob.glob('**/*.ipynb', recursive=True):
 
-    # FIXME: the contour notebook needs a data.json file which is missing
-    if 'contour' in notebook:
-        continue
-
     print("Running {0}".format(notebook))
 
     with open(notebook) as f:
