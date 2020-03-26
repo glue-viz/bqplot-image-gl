@@ -1,4 +1,7 @@
 "use strict";
+
+var version = require('./version').version;
+
 Object.defineProperty(exports, "__esModule", { value: true });
 const Interaction_1 = require("bqplot");
 const base_1 = require("@jupyter-widgets/base");
@@ -6,12 +9,22 @@ const d3 = require("d3");
 const d3_drag_1 = require("d3-drag");
 const d3_selection_1 = require("d3-selection");
 const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
-// const version_1 = require("./index").version;
+
 class MouseInteractionModel extends base_1.WidgetModel {
     defaults() {
-        return Object.assign({}, base_1.WidgetModel.prototype.defaults(), { _model_name: "MouseInteractionModel", _view_name: "MouseInteraction", _model_module: "bqplot", _view_module: "bqplot", _model_module_version: '0.2.0', _view_module_version: '0.2.0', scale_x: null, scale_y: null, cursor: 'auto' });
+        return Object.assign({}, base_1.WidgetModel.prototype.defaults(), {
+            _model_name: "MouseInteractionModel",
+            _view_name: "MouseInteraction",
+            _model_module: "bqplot-image-gl",
+            _view_module: "bqplot-image-gl",
+            _model_module_version: version,
+            _view_module_version: version,
+            scale_x: null,
+            scale_y: null,
+            cursor: 'auto' });
     }
 }
+
 MouseInteractionModel.serializers = Object.assign({}, base_1.WidgetModel.serializers, { x_scale: { deserialize: base_1.unpack_models }, y_scale: { deserialize: base_1.unpack_models } });
 exports.MouseInteractionModel = MouseInteractionModel;
 class MouseInteraction extends Interaction_1.Interaction {

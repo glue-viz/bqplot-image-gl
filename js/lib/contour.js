@@ -1,3 +1,5 @@
+var version = require('./version').version;
+
 import * as bqplot from 'bqplot';
 import * as widgets from "@jupyter-widgets/base";
 import * as d3contour from "d3-contour";
@@ -14,8 +16,8 @@ class ContourModel extends bqplot.MarkModel {
             _view_name : 'ContourView',
             _model_module : 'bqplot-image-gl',
             _view_module : 'bqplot-image-gl',
-            _model_module_version : '0.4.0',
-            _view_module_version : '0.4.0',
+            _model_module_version : version,
+            _view_module_version : version,
             image: null,
             level: null,
             color: null,
