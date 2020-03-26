@@ -1,5 +1,7 @@
 /*jshint esversion: 6 */
 
+var version = require('./version').version;
+
 var widgets = require('@jupyter-widgets/base');
 var _ = require('lodash');
 var d3 = require("d3");
@@ -19,8 +21,8 @@ class ImageGLModel extends bqplot.MarkModel {
             _view_name : 'ImageGLView',
             _model_module : 'bqplot-image-gl',
             _view_module : 'bqplot-image-gl',
-            _model_module_version : '0.4.0',
-            _view_module_version : '0.4.0',
+            _model_module_version : version,
+            _view_module_version : version,
             interpolation: 'nearest',
             opacity: 1.0,
             x: (0.0, 1.0),
@@ -355,8 +357,8 @@ var ImageMark = widgets.DOMWidgetModel.extend({
         _view_name : 'HelloView',
         _model_module : 'bqplot-image-gl',
         _view_module : 'bqplot-image-gl',
-        _model_module_version : '0.4.0',
-        _view_module_version : '0.4.0',
+        _model_module_version : version,
+        _view_module_version : version,
         value : 'Hello World'
     })
 });

@@ -1,6 +1,7 @@
-from ._version import version_info, __version__
+from ._version import version_info, __version__  # noqa
 
-from .imagegl import *
+from .imagegl import *  # noqa
+
 
 def _jupyter_nbextension_paths():
     return [{

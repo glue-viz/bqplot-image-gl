@@ -2,6 +2,8 @@ from bqplot.interacts import BrushSelector, Interaction
 from bqplot.scales import Scale
 from traitlets import Float, Unicode, Dict, Instance
 from ipywidgets.widgets.widget import widget_serialization
+from bqplot_image_gl._version import __version__
+
 
 class BrushEllipseSelector(BrushSelector):
 
@@ -41,8 +43,8 @@ class BrushEllipseSelector(BrushSelector):
     """
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^0.2.0').tag(sync=True)
-    _model_module_version = Unicode('^0.2.0').tag(sync=True)
+    _view_module_version = Unicode('^' + __version__).tag(sync=True)
+    _model_module_version = Unicode('^' + __version__).tag(sync=True)
     pixel_aspect = Float(None, allow_none=True).tag(sync=True)
     style = Dict({"fill": "green", "opacity": 0.3, "cursor": "grab"}).tag(sync=True)
     border_style = Dict({"stroke": "green", "fill": "none", "stroke-width": "3px",
@@ -80,8 +82,8 @@ class MouseInteraction(Interaction):
     """
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^0.2.0').tag(sync=True)
-    _model_module_version = Unicode('^0.2.0').tag(sync=True)
+    _view_module_version = Unicode('^' + __version__).tag(sync=True)
+    _model_module_version = Unicode('^' + __version__).tag(sync=True)
     _view_name = Unicode('MouseInteraction').tag(sync=True)
     _model_name = Unicode('MouseInteractionModel').tag(sync=True)
     x_scale = Instance(Scale, allow_none=True, default_value=None)\
