@@ -38,16 +38,27 @@ class BrushEllipseSelector extends BaseXYSelector {
     }
     async render() {
         super.render();
+
         const scale_creation_promise = this.create_scales();
         await Promise.all([this.mark_views_promise, scale_creation_promise]);
         // we need to create our copy of this d3 selection, since we got out own copy of d3
         const d3el = d3.select(this.d3el.node());
-        this.d3ellipseHandle =  d3el.append("ellipse");
-        this.d3ellipse =    d3el.attr("class", "selector brushintsel").append("ellipse");
-        // we need to create our copy of this d3 selection, since we got out own copy of d3
-        // events for brushing (a new ellipse)
-        const bg_events = d3.select(this.parent.bg_events.node())
-        bg_events.call(d3_drag_1.drag().on("start", () => {
+        d3el.attr('clip-path', "url(#" + this.parent.clip_id + ")")
+        this.eventElement = d3el.append('rect')
+            .attrs({x: 0, y:0})
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .attr("pointer-events", "all")
+            .style("cursor", "crosshair")
+            .style("visibility", "hidden")
+        ;
+        d3el.attr("class", "selector brushintsel")
+        this.brush = d3el.append('g')
+            .style("visibility", "visible");
+
+        this.d3ellipseHandle =  this.brush.append("ellipse");
+        this.d3ellipse =    this.brush.append("ellipse");
+        this.eventElement.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
             this._brushStart({ x: e.x, y: e.y });
         }).on("drag", () => {
@@ -83,6 +94,17 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.syncSelectionToMarks();
         this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style', () => this.updateEllipse());
         this.listenTo(this.model, 'change:selected_x change:selected_y', this.syncSelectionToMarks);
+    }
+    relayout() {
+        // Called when the figure margins are updated.
+        this.eventElement
+            .attr("width", this.parent.width -
+                           this.parent.margin.left -
+                           this.parent.margin.right)
+            .attr("height", this.parent.height -
+                            this.parent.margin.top -
+                            this.parent.margin.bottom);
+        this.updateEllipse()
     }
     remove() {
         super.remove()
@@ -284,7 +306,7 @@ class BrushEllipseSelector extends BaseXYSelector {
     }
     updateEllipse(offsetX = 0, offsetY = 0, extraRx = 0, extraRy = 0) {
         if (!this.canDraw()) {
-            this.d3el.node().style.visibility = 'hidden';
+            this.brush.node().style.display = 'none';
         }
         else {
             const { cx, cy, rx, ry } = this.calculatePixelCoordinates();
@@ -302,7 +324,7 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("ry", ry + extraRy)
                 .style('stroke', this.model.get('color') || 'black')
                 .styles(this.model.get('border_style'));
-            this.d3el.node().style.visibility = 'visible';
+            this.brush.node().style.display = '';
         }
     }
     syncSelectionToMarks() {
