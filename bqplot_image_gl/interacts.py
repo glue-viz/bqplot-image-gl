@@ -46,8 +46,8 @@ class BrushEllipseSelector(BrushSelector):
     _view_module_version = Unicode('^' + __version__).tag(sync=True)
     _model_module_version = Unicode('^' + __version__).tag(sync=True)
     pixel_aspect = Float(None, allow_none=True).tag(sync=True)
-    style = Dict({"fill": "green", "opacity": 0.3, "cursor": "grab"}).tag(sync=True)
-    border_style = Dict({"stroke": "green", "fill": "none", "stroke-width": "3px",
+    style = Dict({"opacity": 0.3, "cursor": "grab"}).tag(sync=True)
+    border_style = Dict({"fill": "none", "stroke-width": "3px",
                          "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
     _view_name = Unicode('BrushEllipseSelector').tag(sync=True)
     _model_name = Unicode('BrushEllipseSelectorModel').tag(sync=True)

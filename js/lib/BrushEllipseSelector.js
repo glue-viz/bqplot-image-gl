@@ -293,12 +293,14 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("cy", cy + offsetY)
                 .attr("rx", rx + extraRx)
                 .attr("ry", ry + extraRy)
+                .style('fill', this.model.get('color') || 'grey')
                 .styles(this.model.get('style'));
             this.d3ellipseHandle
                 .attr("cx", cx + offsetX)
                 .attr("cy", cy + offsetY)
                 .attr("rx", rx + extraRx)
                 .attr("ry", ry + extraRy)
+                .style('stroke', this.model.get('color') || 'black')
                 .styles(this.model.get('border_style'));
             this.d3el.node().style.visibility = 'visible';
         }
