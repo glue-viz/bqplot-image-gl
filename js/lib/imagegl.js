@@ -234,6 +234,24 @@ class ImageGLView extends bqplot.Mark {
     }
 
     update_colormap() {
+		
+        var parse_color_string = function(string){
+            const hex_pattern = /.([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/;
+            const tuple_pattern = /rgb\((\d+), (\d+), (\d+)\)/;
+            var hex_match = hex_pattern.exec(string);
+            if (hex_match) {
+                return [parseInt("0x" + hex_match[1]),
+                        parseInt("0x" + hex_match[2]),
+                        parseInt("0x" + hex_match[3])];
+            }
+            var tuple_match = tuple_pattern.exec(string)
+            if (tuple_match) {
+                return [parseInt(tuple_match[1]),
+                        parseInt(tuple_match[2]),
+                        parseInt(tuple_match[3])];
+	        }
+        }
+		
         // convert the d3 color scale to a texture
         var colors = this.scales.image.model.color_range;
         var color_scale = d3.scaleLinear()
@@ -244,9 +262,7 @@ class ImageGLView extends bqplot.Mark {
         var colormap = _.map(_.range(N), (i) => {
             var index = i/(N-1);
             var rgb = color_scale(index);
-            rgb = [parseInt("0x" + rgb.substring(1, 3)),
-                   parseInt("0x" + rgb.substring(3, 5)),
-                   parseInt("0x" + rgb.substring(5, 7))];
+            rgb = parse_color_string(rgb);
             colormap_array.push(rgb[0], rgb[1], rgb[2]);
         });
         colormap_array = new Uint8Array(colormap_array);
