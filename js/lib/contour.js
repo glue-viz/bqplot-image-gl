@@ -31,7 +31,6 @@ class ContourModel extends bqplot.MarkModel {
     initialize(attributes, options) {
         super.initialize(attributes, options);
         this.on_some_change(['level', 'contour_lines'], this.update_data, this);
-        this.on_some_change(["preserve_domain"], this.update_domains, this);
         this.update_data();
     }
 
@@ -70,30 +69,6 @@ class ContourModel extends bqplot.MarkModel {
         }
         this.trigger("data_updated");
     }
-
-    update_domains() {
-        if(!this.mark_data) {
-            return;
-        }
-        var scales = this.get("scales");
-        var x_scale = scales.x;
-        var y_scale = scales.y;
-
-        if(x_scale) {
-            if(!this.get("preserve_domain").x) {
-                x_scale.compute_and_set_domain(this.mark_data.x, this.model_id + "_x");
-            } else {
-                x_scale.del_domain([], this.model_id + "_x");
-            }
-        }
-        if(y_scale) {
-            if(!this.get("preserve_domain").y) {
-                y_scale.compute_and_set_domain(this.mark_data.y, this.model_id + "_y");
-            } else {
-                y_scale.del_domain([], this.model_id + "_y");
-            }
-        }
-    }
 }
 
 class ContourView extends bqplot.Mark {
@@ -102,15 +77,32 @@ class ContourView extends bqplot.Mark {
         this.listenTo(this.model, "change:label_steps", () => {
             this.updateLabels()
         })
+        this.listenTo(this.parent, "margin_updated", () => {
+            this.set_ranges();
+            this.updatePaths();
+            this.updateLabels();
+        });
         this.listenTo(this.model, "change:color", () => {
             // TODO: this is not efficient, but updateColor does not work as it is
             // this.updateColors()
-            this.updatePaths()
-            this.updateLabels()
+            this.updatePaths();
+            this.updateLabels();
         });
         this.listenTo(this.model, "data_updated", () => {
             this.updatePaths()
             this.updateLabels()
+        });
+    }
+    set_positional_scales() {
+        var x_scale = this.scales.x,
+            y_scale = this.scales.y;
+        this.listenTo(x_scale, "domain_changed", function() {
+            this.updatePaths();
+            this.updateLabels();
+        });
+        this.listenTo(y_scale, "domain_changed", function() {
+            this.updatePaths();
+            this.updateLabels();
         });
     }
     updateColors() {
