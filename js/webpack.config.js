@@ -22,7 +22,8 @@ module.exports = [
         output: {
             filename: 'extension.js',
             path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
-            libraryTarget: 'amd'
+            libraryTarget: 'amd',
+            devtoolModuleFilenameTemplate: 'webpack://jupyter-widgets/bqplot-image-gl/[resource-path]?[loaders]',
         }
     },
     {// Bundle for the notebook containing the custom widget views and models
@@ -36,7 +37,7 @@ module.exports = [
             filename: 'index.js',
             path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
             libraryTarget: 'amd',
-            devtoolModuleFilenameTemplate: 'webpack://bqplot-image-gl/[namespace]/[resource-path]?[loaders]',
+            devtoolModuleFilenameTemplate: 'webpack://jupyter-widgets/bqplot-image-gl/[resource-path]?[loaders]',
         },
         devtool: 'source-map',
         module: {
@@ -63,7 +64,8 @@ module.exports = [
             filename: 'index.js',
             path: path.resolve(__dirname, 'dist'),
             libraryTarget: 'amd',
-            publicPath: 'https://unpkg.com/bqplot-image-gl@' + version + '/dist/'
+            publicPath: 'https://unpkg.com/bqplot-image-gl@' + version + '/dist/',
+            devtoolModuleFilenameTemplate: 'webpack://jupyter-widgets/bqplot-image-gl/[resource-path]?[loaders]',
         },
         devtool: 'source-map',
         module: {
