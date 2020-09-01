@@ -41,6 +41,7 @@ class BrushEllipseSelector extends BaseXYSelector {
 
         const scale_creation_promise = this.create_scales();
         await Promise.all([this.mark_views_promise, scale_creation_promise]);
+        this.create_listeners();
         // we need to create our copy of this d3 selection, since we got out own copy of d3
         const d3el = d3.select(this.d3el.node());
         d3el.attr('clip-path', "url(#" + this.parent.clip_id + ")")
@@ -96,6 +97,9 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.listenTo(this.model, 'change:selected_x change:selected_y', this.syncSelectionToMarks);
     }
     relayout() {
+        super.relayout();
+        this.x_scale.set_range(this.parent.padded_range("x", this.x_scale.model));
+        this.y_scale.set_range(this.parent.padded_range("y", this.y_scale.model));
         // Called when the figure margins are updated.
         this.eventElement
             .attr("width", this.parent.width -
