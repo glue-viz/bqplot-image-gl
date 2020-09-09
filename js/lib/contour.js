@@ -74,7 +74,7 @@ class ContourModel extends bqplot.MarkModel {
 class ContourView extends bqplot.Mark {
     create_listeners() {
         super.create_listeners();
-        this.listenTo(this.model, "change:label_steps", () => {
+        this.listenTo(this.model, "change:label_steps change:label", () => {
             this.updateLabels()
         })
         this.listenTo(this.parent, "margin_updated", () => {
@@ -114,8 +114,11 @@ class ContourView extends bqplot.Mark {
         this.d3label_group.selectAll("text").attr("fill", color)
     }
     getColor(threshold, index) {
-        if(this.model.get('color'))
-            return this.model.get('color');
+        let color = this.model.get('color')
+        if(color) {
+            const color_array = Array.isArray(color) ? color : [color];
+            return color_array[index % color_array.length];
+        }
         const model = this.model;
         var colors = this.scales.image.model.color_range;
         var color_scale = d3.scaleLinear()
@@ -126,7 +129,7 @@ class ContourView extends bqplot.Mark {
         const delta = max - min;
         // a good default color is one that is 50% off from the value of the colormap
         const level_plus_50_percent = ((threshold - min) + delta / 2) % delta + min;
-        const color = color_scale(level_plus_50_percent);
+        color = color_scale(level_plus_50_percent);
         return color;
     }
     createPath(index) {
@@ -196,8 +199,14 @@ class ContourView extends bqplot.Mark {
 
         this.model.contours.forEach((contour, index) => {
             const color = this.getColor(model.thresholds[index], index);
-            const label = String(model.thresholds[index]);
-                // http://wiki.geojson.org/GeoJSON_draft_version_6#MultiPolygon
+            let label = this.model.get('label')
+            if(label) {
+                const label_array = Array.isArray(label) ? label : [label];
+                label = label_array[index % label_array.length];
+            } else {
+                label = String(model.thresholds[index]);
+            }
+            // http://wiki.geojson.org/GeoJSON_draft_version_6#MultiPolygon
             const is_polygon = contour.type == 'MultiPolygon';
             contour.coordinates.forEach(polygon => {
                 // a MultiPolygon is a list of rings
