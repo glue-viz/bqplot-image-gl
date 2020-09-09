@@ -70,7 +70,9 @@ class Contour(bqplot.Mark):
     contour_lines = (List(List(Array(None, allow_none=True)))
                      .tag(sync=True, **double_list_array_serialization))
     level = (Float() | List(Float())).tag(sync=True)
-    color = widgets.Color(None, allow_none=True).tag(sync=True)
+    label = (Unicode(None, allow_none=True) | List(Unicode())).tag(sync=True)
+    color = (widgets.Color(None, allow_none=True) |
+             List(widgets.Color(None, allow_none=True))).tag(sync=True)
     scales_metadata = Dict({
         'x': {'orientation': 'horizontal', 'dimension': 'x'},
         'y': {'orientation': 'vertical', 'dimension': 'y'},
