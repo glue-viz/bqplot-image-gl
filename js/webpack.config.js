@@ -21,7 +21,7 @@ module.exports = [
         entry: './lib/extension.js',
         output: {
             filename: 'extension.js',
-            path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
+            path: path.resolve(__dirname, '../share/jupyter/nbextensions/bqplot-image-gl'),
             libraryTarget: 'amd',
             devtoolModuleFilenameTemplate: 'webpack://jupyter-widgets/bqplot-image-gl/[resource-path]?[loaders]',
         }
@@ -35,7 +35,7 @@ module.exports = [
         entry: './lib/index.js',
         output: {
             filename: 'index.js',
-            path: path.resolve(__dirname, '..', 'bqplot_image_gl', 'static'),
+            path: path.resolve(__dirname, '../share/jupyter/nbextensions/bqplot-image-gl'),
             libraryTarget: 'amd',
             devtoolModuleFilenameTemplate: 'webpack://jupyter-widgets/bqplot-image-gl/[resource-path]?[loaders]',
         },
