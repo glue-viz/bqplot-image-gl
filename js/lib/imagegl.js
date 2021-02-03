@@ -78,10 +78,16 @@ class ImageGLModel extends bqplot.MarkModel {
 ImageGLModel.serializers = Object.assign({}, bqplot.MarkModel.serializers,
                                          { x: serialize.array_or_json,
                                            y: serialize.array_or_json,
-                                           image: { deserialize: (obj, manager) => {
-                                               let state = {buffer: obj.value, dtype: obj.dtype, shape: obj.shape};
-                                               return jupyter_dataserializers.JSONToArray(state);
-                                           }}});
+                                           image: {
+                                                deserialize: (obj, manager) => {
+                                                    let state = {buffer: obj.value, dtype: obj.dtype, shape: obj.shape};
+                                                    return jupyter_dataserializers.JSONToArray(state);
+                                                },
+                                                serialize: (ar) => {
+                                                    const {buffer, dtype, shape} = jupyter_dataserializers.arrayToJSON(ar);
+                                                    return {value: buffer, dtype:dtype, shape:shape}
+                                                }
+                                            }});
 
 class ImageGLView extends bqplot.Mark {
 
