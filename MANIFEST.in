@@ -1,2 +1,2 @@
 recursive-include bqplot_image_gl/static *.*
-include bqplot_image_gl.json
+include etc/jupyter/nbconfig/notebook.d/bqplot-image-gl.json
