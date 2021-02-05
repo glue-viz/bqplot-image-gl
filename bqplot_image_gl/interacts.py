@@ -1,6 +1,6 @@
 from bqplot.interacts import BrushSelector, Interaction
 from bqplot.scales import Scale
-from traitlets import Float, Unicode, Dict, Instance
+from traitlets import Float, Unicode, Dict, Instance, Int
 from ipywidgets.widgets.widget import widget_serialization
 from bqplot_image_gl._version import __version__
 
@@ -79,6 +79,7 @@ class MouseInteraction(Interaction):
     y_scale: An instance of Scale
         This is the scale which is used for inversion from the pixels to data
         co-ordinates in the y-direction.
+    move_throttle: Send mouse move events only every specified milliseconds.
     """
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
@@ -91,3 +92,4 @@ class MouseInteraction(Interaction):
     y_scale = Instance(Scale, allow_none=True, default_value=None)\
         .tag(sync=True, dimension='y', **widget_serialization)
     cursor = Unicode('auto').tag(sync=True)
+    move_throttle = Int(50).tag(sync=True)
