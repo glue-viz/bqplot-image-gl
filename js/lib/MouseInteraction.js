@@ -61,13 +61,16 @@ class MouseInteraction extends Interaction_1.Interaction {
             this._emit('dragend', { x: e.x, y: e.y });
         }));
         // and click events
-        ['click', 'dblclick', 'mouseenter', 'mouseleave'].forEach(eventName => {
+        ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'].forEach(eventName => {
             eventElement.on(eventName, () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
                 const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
-                this._emit(eventName, { x, y });
+                e.preventDefault();
+                e.stopPropagation();
+                this._emit(eventName, { x, y }, {button: e.button, altKey: e.altKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey});
+                return false
             });
         });
         // throttled events
@@ -88,9 +91,9 @@ class MouseInteraction extends Interaction_1.Interaction {
         super.remove();
         this.parent.off('margin_updated', this.updateScaleRanges);
     }
-    _emit(name, { x, y }) {
+    _emit(name, { x, y }, extra) {
         let domain = { x: this.x_scale.scale.invert(x), y: this.y_scale.scale.invert(y) };
-        this.send({ event: name, pixel: { x, y }, domain: domain });
+        this.send({ event: name, pixel: { x, y }, domain: domain, ...extra });
     }
 }
 exports.MouseInteraction = MouseInteraction;
