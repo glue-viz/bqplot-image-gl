@@ -29,7 +29,7 @@ jstargets = [
 data_files_spec = [
     (f'share/jupyter/nbextensions/{name}', f'share/jupyter/nbextensions/{name}', '*.js'),
     (f'share/jupyter/labextensions/{name}/', f'share/jupyter/labextensions/{name}/', '**'),
-    (f'etc/jupyter/nbconfig/notebook.d', f'etc/jupyter/nbconfig/notebook.d', '{name}.json'),
+    (f'etc/jupyter/nbconfig/notebook.d', f'etc/jupyter/nbconfig/notebook.d', f'{name}.json'),
 ]
 
 js_command = combine_commands(
