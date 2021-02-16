@@ -12,6 +12,7 @@ const d3 = require("d3");
 const d3SelMulti = require("d3-selection-multi");
 const d3_drag_1 = require("d3-drag");
 const d3Selection = require("d3-selection");
+const { applyStyles } = require("./utils");
 const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
 /*
     good resource: https://en.wikipedia.org/wiki/Ellipse
@@ -46,7 +47,8 @@ class BrushEllipseSelector extends BaseXYSelector {
         const d3el = d3.select(this.d3el.node());
         d3el.attr('clip-path', "url(#" + this.parent.clip_id + ")")
         this.eventElement = d3el.append('rect')
-            .attrs({x: 0, y:0})
+            .attr("x", 0)
+            .attr("y", 0)
             .attr("width", this.width)
             .attr("height", this.height)
             .attr("pointer-events", "all")
@@ -319,15 +321,15 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("cy", cy + offsetY)
                 .attr("rx", rx + extraRx)
                 .attr("ry", ry + extraRy)
-                .style('fill', this.model.get('color') || 'grey')
-                .styles(this.model.get('style'));
+                .style('fill', this.model.get('color') || 'grey');
+            applyStyles(this.d3ellipse, this.model.get('style'));
             this.d3ellipseHandle
                 .attr("cx", cx + offsetX)
                 .attr("cy", cy + offsetY)
                 .attr("rx", rx + extraRx)
                 .attr("ry", ry + extraRy)
                 .style('stroke', this.model.get('color') || 'black')
-                .styles(this.model.get('border_style'));
+            applyStyles(this.d3ellipseHandle, this.model.get('border_style'));
             this.brush.node().style.display = '';
         }
     }
