@@ -37,6 +37,7 @@ class MouseInteraction extends Interaction_1.Interaction {
         super.render();
         this.x_scale = await this.create_child_view(this.model.get("x_scale"));
         this.y_scale = await this.create_child_view(this.model.get("y_scale"));
+        this.last_mouse_point = [-1, -1];
         this.parent.on("margin_updated", this.updateScaleRanges, this);
         this.updateScaleRanges();
         const updateCursor = () => {
@@ -64,6 +65,16 @@ class MouseInteraction extends Interaction_1.Interaction {
         ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'].forEach(eventName => {
             eventElement.on(eventName, () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
+                if (eventName !== 'mouseleave') {
+                    // to allow the div to get focus, but we will not allow it to be reachable by tab key
+                    this.parent.el.setAttribute("tabindex", -1);
+                    // we only get keyboard events if we have focus
+                    this.parent.el.focus();
+                }
+                if (eventName === 'mouseleave') {
+                    // restore
+                    this.parent.el.removeAttribute("tabindex");
+                }
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
                 const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
@@ -73,12 +84,26 @@ class MouseInteraction extends Interaction_1.Interaction {
                 return false
             });
         });
+        ['keydown', 'keyup'].forEach(eventName => {
+            d3.select(this.parent.el).on(eventName, () => {
+                this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
+                const e = d3GetEvent();
+                // to be consistent with drag events, we need to user clientPoint
+                // const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
+                const [x, y] = this.last_mouse_point;
+                e.preventDefault();
+                e.stopPropagation();
+                this._emit(eventName, { x, y }, {code: e.code, charCode: e.charCode, key: e.key, keyCode: e.keyCode, altKey: e.altKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey});
+                return false
+            });
+        });
         // throttled events
         ['mousemove'].forEach(eventName => {
             eventElement.on(eventName, () => {
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
                 const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
+                this.last_mouse_point = [x, y];
                 this._emitThrottled(eventName, { x, y });
             });
         });
@@ -90,6 +115,8 @@ class MouseInteraction extends Interaction_1.Interaction {
     remove() {
         super.remove();
         this.parent.off('margin_updated', this.updateScaleRanges);
+        this.parent.el.removeAttribute("tabindex");
+        this._emitThrottled.flush();
     }
     _emit(name, { x, y }, extra) {
         let domain = { x: this.x_scale.scale.invert(x), y: this.y_scale.scale.invert(y) };
