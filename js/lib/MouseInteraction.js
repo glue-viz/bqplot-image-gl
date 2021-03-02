@@ -24,26 +24,31 @@ class MouseInteractionModel extends base_1.WidgetModel {
             scale_y: null,
             scale_y: null,
             move_throttle: 50,
-            cursor: 'auto' });
+            cursor: 'auto',
+            next: null,
+            events: [],
+        });
     }
 }
 
-MouseInteractionModel.serializers = Object.assign({}, base_1.WidgetModel.serializers, { x_scale: { deserialize: base_1.unpack_models }, y_scale: { deserialize: base_1.unpack_models } });
+MouseInteractionModel.serializers = Object.assign({}, base_1.WidgetModel.serializers, { x_scale: { deserialize: base_1.unpack_models }, y_scale: { deserialize: base_1.unpack_models }, next: { deserialize: base_1.unpack_models } });
 exports.MouseInteractionModel = MouseInteractionModel;
 class MouseInteraction extends Interaction_1.Interaction {
     async render() {
-        // events for dragging etc
-        const eventElement = d3.select(this.d3el.node());
         super.render();
+        this.el.setAttribute('display', 'none');
+        this.eventElement = d3.select(this.parent.interaction.node());
+        this.nextView = null;
         this.x_scale = await this.create_child_view(this.model.get("x_scale"));
         this.y_scale = await this.create_child_view(this.model.get("y_scale"));
         this.last_mouse_point = [-1, -1];
         this.parent.on("margin_updated", this.updateScaleRanges, this);
         this.updateScaleRanges();
         const updateCursor = () => {
-            eventElement.node().style.cursor = this.model.get('cursor');
+            this.eventElement.node().style.cursor = this.model.get('cursor');
         };
         this.listenTo(this.model, "change:cursor", updateCursor);
+        this.listenTo(this.model, "change:next", this.updateNextInteract);
         updateCursor();
         const updateThrottle = () => {
             this._emitThrottled = _.throttle(this._emit, this.model.get('move_throttle'));
@@ -51,19 +56,29 @@ class MouseInteraction extends Interaction_1.Interaction {
         updateThrottle();
         this.listenTo(this.model, 'change:move_throttle', updateThrottle);
 
-        eventElement.call(d3_drag_1.drag().on("start", () => {
-            const e = d3GetEvent();
-            this._emit('dragstart', { x: e.x, y: e.y });
-        }).on("drag", () => {
-            const e = d3GetEvent();
-            this._emit('dragmove', { x: e.x, y: e.y });
-        }).on("end", () => {
-            const e = d3GetEvent();
-            this._emit('dragend', { x: e.x, y: e.y });
-        }));
+        this.bindEvents();
+        await this.updateNextInteract();
+    }
+
+    bindEvents() {
+        const events = this.model.get("events");
+        // we don't want to bind these events if we don't need them, because drag events
+        // can call stop propagation
+        if (this.eventEnabled("dragstart") && this.eventEnabled("dragmove") && this.eventEnabled("dragend")) {
+            this.eventElement.call(d3_drag_1.drag().on("start", () => {
+                const e = d3GetEvent();
+                this._emit('dragstart', { x: e.x, y: e.y });
+            }).on("drag", () => {
+                const e = d3GetEvent();
+                this._emit('dragmove', { x: e.x, y: e.y });
+            }).on("end", () => {
+                const e = d3GetEvent();
+                this._emit('dragend', { x: e.x, y: e.y });
+            }));
+        }
         // and click events
         ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'].forEach(eventName => {
-            eventElement.on(eventName, () => {
+            this.eventElement.on(eventName, () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 if (eventName !== 'mouseleave') {
                     // to allow the div to get focus, but we will not allow it to be reachable by tab key
@@ -77,9 +92,12 @@ class MouseInteraction extends Interaction_1.Interaction {
                 }
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
-                const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
-                e.preventDefault();
-                e.stopPropagation();
+                const [x, y] = d3_selection_1.clientPoint(this.eventElement.node(), e);
+                const events = this.model.get("events");
+                if (eventName == 'contextmenu' && this.eventEnabled('contextmenu')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 this._emit(eventName, { x, y }, {button: e.button, altKey: e.altKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey});
                 return false
             });
@@ -99,15 +117,37 @@ class MouseInteraction extends Interaction_1.Interaction {
         });
         // throttled events
         ['mousemove'].forEach(eventName => {
-            eventElement.on(eventName, () => {
+            this.eventElement.on(eventName, () => {
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
-                const [x, y] = d3_selection_1.clientPoint(eventElement.node(), e);
+                const [x, y] = d3_selection_1.clientPoint(this.eventElement.node(), e);
                 this.last_mouse_point = [x, y];
                 this._emitThrottled(eventName, { x, y });
             });
         });
     }
+
+    eventEnabled(eventName) {
+        const events = this.model.get("events");
+        return (events == null) || events.includes(eventName);
+    }
+
+    async updateNextInteract() {
+        // this mimics Figure.set_iteraction
+        const next = this.model.get('next')
+        if(this.nextView) {
+            this.nextView.remove();
+        }
+        if(!next) {
+            return;
+        }
+        this.nextView = await this.parent.create_child_view(next);
+        this.parent.interaction.node().appendChild(this.nextView.el);
+        this.parent.displayed.then(() => {
+            this.nextView.trigger("displayed");
+        });
+    }
+
     updateScaleRanges() {
         this.x_scale.set_range(this.parent.padded_range("x", this.x_scale.model));
         this.y_scale.set_range(this.parent.padded_range("y", this.y_scale.model));
@@ -119,6 +159,9 @@ class MouseInteraction extends Interaction_1.Interaction {
         this._emitThrottled.flush();
     }
     _emit(name, { x, y }, extra) {
+        if(!this.eventEnabled(name)) {
+            return;
+        }
         let domain = { x: this.x_scale.scale.invert(x), y: this.y_scale.scale.invert(y) };
         this.send({ event: name, pixel: { x, y }, domain: domain, ...extra });
     }
