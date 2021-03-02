@@ -1,8 +1,13 @@
 from bqplot.interacts import BrushSelector, Interaction
 from bqplot.scales import Scale
-from traitlets import Float, Unicode, Dict, Instance, Int
+from traitlets import Float, Unicode, Dict, Instance, Int, List
 from ipywidgets.widgets.widget import widget_serialization
 from bqplot_image_gl._version import __version__
+
+
+drag_events = ["dragstart", "dragmove", "dragend"]
+mouse_events = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu', 'mousemove']
+keyboard_events = ['keydown', 'keyup']
 
 
 class BrushEllipseSelector(BrushSelector):
@@ -93,3 +98,6 @@ class MouseInteraction(Interaction):
         .tag(sync=True, dimension='y', **widget_serialization)
     cursor = Unicode('auto').tag(sync=True)
     move_throttle = Int(50).tag(sync=True)
+    next = Instance(Interaction).tag(sync=True, **widget_serialization)
+    events = List(Unicode, default_value=drag_events + mouse_events + keyboard_events,
+                  allow_none=True).tag(sync=True)
