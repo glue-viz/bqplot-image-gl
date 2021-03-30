@@ -36,7 +36,6 @@ exports.MouseInteractionModel = MouseInteractionModel;
 class MouseInteraction extends Interaction_1.Interaction {
     async render() {
         super.render();
-        this.el.setAttribute('display', 'none');
         this.eventElement = d3.select(this.parent.interaction.node());
         this.nextView = null;
         this.x_scale = await this.create_child_view(this.model.get("x_scale"));
@@ -57,7 +56,9 @@ class MouseInteraction extends Interaction_1.Interaction {
         this.listenTo(this.model, 'change:move_throttle', updateThrottle);
 
         this.bindEvents();
-        await this.updateNextInteract();
+        // no await for this async function, because otherwise we want for
+        // this.displayed, which will never happen before render resolves
+        this.updateNextInteract();
     }
 
     bindEvents() {
@@ -134,6 +135,9 @@ class MouseInteraction extends Interaction_1.Interaction {
 
     async updateNextInteract() {
         // this mimics Figure.set_iteraction
+        // but we want the 'next' interaction to be added after we are added
+        // to the DOM, so we don't steal all mouse events
+        await this.displayed;
         const next = this.model.get('next')
         if(this.nextView) {
             this.nextView.remove();
