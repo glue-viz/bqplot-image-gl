@@ -11,6 +11,11 @@ const _ = require("lodash");
 const d3_selection_1 = require("d3-selection");
 const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
 
+const clickEvents = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'];
+const keyEvents = ['keydown', 'keyup'];
+const throttledEvents = ['mousemove'];
+const dragEvents = ['start', 'drag', 'end'];
+
 class MouseInteractionModel extends base_1.WidgetModel {
     defaults() {
         return Object.assign({}, base_1.WidgetModel.prototype.defaults(), {
@@ -36,7 +41,6 @@ exports.MouseInteractionModel = MouseInteractionModel;
 class MouseInteraction extends Interaction_1.Interaction {
     async render() {
         super.render();
-        this.el.setAttribute('display', 'none');
         this.eventElement = d3.select(this.parent.interaction.node());
         this.nextView = null;
         this.x_scale = await this.create_child_view(this.model.get("x_scale"));
@@ -57,7 +61,9 @@ class MouseInteraction extends Interaction_1.Interaction {
         this.listenTo(this.model, 'change:move_throttle', updateThrottle);
 
         this.bindEvents();
-        await this.updateNextInteract();
+        // no await for this async function, because otherwise we want for
+        // this.displayed, which will never happen before render resolves
+        this.updateNextInteract();
     }
 
     bindEvents() {
@@ -65,20 +71,20 @@ class MouseInteraction extends Interaction_1.Interaction {
         // we don't want to bind these events if we don't need them, because drag events
         // can call stop propagation
         if (this.eventEnabled("dragstart") && this.eventEnabled("dragmove") && this.eventEnabled("dragend")) {
-            this.eventElement.call(d3_drag_1.drag().on("start", () => {
+            this.eventElement.call(d3_drag_1.drag().on(this._eventName("start"), () => {
                 const e = d3GetEvent();
                 this._emit('dragstart', { x: e.x, y: e.y });
-            }).on("drag", () => {
+            }).on(this._eventName("drag"), () => {
                 const e = d3GetEvent();
                 this._emit('dragmove', { x: e.x, y: e.y });
-            }).on("end", () => {
+            }).on(this._eventName("end"), () => {
                 const e = d3GetEvent();
                 this._emit('dragend', { x: e.x, y: e.y });
             }));
         }
         // and click events
-        ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'].forEach(eventName => {
-            this.eventElement.on(eventName, () => {
+        clickEvents.forEach(eventName => {
+            this.eventElement.on(this._eventName(eventName), () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 if (eventName !== 'mouseleave') {
                     // to allow the div to get focus, but we will not allow it to be reachable by tab key
@@ -102,8 +108,8 @@ class MouseInteraction extends Interaction_1.Interaction {
                 return false
             });
         });
-        ['keydown', 'keyup'].forEach(eventName => {
-            d3.select(this.parent.el).on(eventName, () => {
+        keyEvents.forEach(eventName => {
+            d3.select(this.parent.el).on(this._eventName(eventName), () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
@@ -116,8 +122,8 @@ class MouseInteraction extends Interaction_1.Interaction {
             });
         });
         // throttled events
-        ['mousemove'].forEach(eventName => {
-            this.eventElement.on(eventName, () => {
+        throttledEvents.forEach(eventName => {
+            this.eventElement.on(this._eventName(eventName), () => {
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
                 const [x, y] = d3_selection_1.clientPoint(this.eventElement.node(), e);
@@ -127,6 +133,20 @@ class MouseInteraction extends Interaction_1.Interaction {
         });
     }
 
+    _eventName(name) {
+        // using namespaced event names (e.g. click.view123) to support multiple
+        // listeners on the same DOM element (our parent interaction node)
+        return `${name}.${this.cid}`
+    }
+
+    unbindEvents() {
+        const off = (name) => this.eventElement.on(this._eventName(name), null);
+        clickEvents.forEach(off);
+        keyEvents.forEach(off);
+        throttledEvents.forEach(off);
+        dragEvents.forEach(off);
+    }
+
     eventEnabled(eventName) {
         const events = this.model.get("events");
         return (events == null) || events.includes(eventName);
@@ -134,6 +154,9 @@ class MouseInteraction extends Interaction_1.Interaction {
 
     async updateNextInteract() {
         // this mimics Figure.set_iteraction
+        // but we want the 'next' interaction to be added after we are added
+        // to the DOM, so we don't steal all mouse events
+        await this.displayed;
         const next = this.model.get('next')
         if(this.nextView) {
             this.nextView.remove();
@@ -154,6 +177,10 @@ class MouseInteraction extends Interaction_1.Interaction {
     }
     remove() {
         super.remove();
+        if(this.nextView) {
+            this.nextView.remove();
+        }
+        this.unbindEvents();
         this.parent.off('margin_updated', this.updateScaleRanges);
         this.parent.el.removeAttribute("tabindex");
         this._emitThrottled.flush();
