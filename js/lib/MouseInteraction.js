@@ -9,7 +9,7 @@ const d3 = require("d3");
 const d3_drag_1 = require("d3-drag");
 const _ = require("lodash");
 const d3_selection_1 = require("d3-selection");
-const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
+const d3GetEvent = function () { return require("d3-selection").event || window.event; }.bind(this);
 
 const clickEvents = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'];
 const keyEvents = ['keydown', 'keyup'];
