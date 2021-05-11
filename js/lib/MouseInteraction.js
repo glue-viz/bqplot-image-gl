@@ -59,6 +59,10 @@ class MouseInteraction extends Interaction_1.Interaction {
         }
         updateThrottle();
         this.listenTo(this.model, 'change:move_throttle', updateThrottle);
+        this.listenTo(this.model, 'change:events', () => {
+            this.unbindEvents();
+            this.bindEvents();
+        });
 
         this.bindEvents();
         // no await for this async function, because otherwise we want for
