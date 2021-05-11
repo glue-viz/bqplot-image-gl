@@ -59,6 +59,10 @@ class MouseInteraction extends Interaction_1.Interaction {
         }
         updateThrottle();
         this.listenTo(this.model, 'change:move_throttle', updateThrottle);
+        this.listenTo(this.model, 'change:events', () => {
+            this.unbindEvents();
+            this.bindEvents();
+        });
 
         this.bindEvents();
         // no await for this async function, because otherwise we want for
@@ -70,7 +74,7 @@ class MouseInteraction extends Interaction_1.Interaction {
         const events = this.model.get("events");
         // we don't want to bind these events if we don't need them, because drag events
         // can call stop propagation
-        if (this.eventEnabled("dragstart") && this.eventEnabled("dragmove") && this.eventEnabled("dragend")) {
+        if (this.eventEnabled("dragstart") || this.eventEnabled("dragmove") || this.eventEnabled("dragend")) {
             this.eventElement.call(d3_drag_1.drag().on(this._eventName("start"), () => {
                 const e = d3GetEvent();
                 this._emit('dragstart', { x: e.x, y: e.y });
