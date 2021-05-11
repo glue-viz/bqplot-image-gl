@@ -90,7 +90,7 @@ class MouseInteraction extends Interaction_1.Interaction {
                     // to allow the div to get focus, but we will not allow it to be reachable by tab key
                     this.parent.el.setAttribute("tabindex", -1);
                     // we only get keyboard events if we have focus
-                    this.parent.el.focus();
+                    this.parent.el.focus({ preventScroll: true });
                 }
                 if (eventName === 'mouseleave') {
                     // restore
