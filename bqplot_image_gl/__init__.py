@@ -1,6 +1,7 @@
 from ._version import version_info, __version__  # noqa
 
 from .imagegl import *  # noqa
+from .linesgl import *  # noqa
 
 
 def _prefix():
