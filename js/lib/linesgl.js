@@ -6,6 +6,11 @@ var bqplot = require('bqplot');
 var THREE = require('three');
 var values = require('./values');
 
+var Line2 = require('./examples/lines/Line2').Line2;
+var LineMaterial = require('./examples/lines/LineMaterial').LineMaterial;
+var LineGeometry = require('./examples/lines/LineGeometry').LineGeometry;
+
+
 const chunk_scales_extra = require('raw-loader!../shaders/scales-extra.glsl').default;
 const chunk_scales_transform = require('raw-loader!../shaders/scales-transform.glsl').default;
 
@@ -30,27 +35,17 @@ class LinesGLModel extends bqplot.LinesModel {
 class LinesGLView extends bqplot.Lines {
 
     async render() {
-        this.uniforms = THREE.UniformsUtils.merge( [
-            THREE.UniformsLib.common,
-            THREE.UniformsLib.specularmap,
-            THREE.UniformsLib.envmap,
-            THREE.UniformsLib.aomap,
-            THREE.UniformsLib.lightmap,
-            THREE.UniformsLib.fog,
-            {
-                domain_x : { type: "2f", value: [0., 1.] },
-                domain_y : { type: "2f", value: [0., 1.] },
-                diffuse: {type: '3f', value: [1, 0, 0]},
-                opacity: {type: 'f', value: 1.0},
-            }
-        ]);
+        this.uniforms = {
+            domain_x : { type: "2f", value: [0., 1.] },
+            domain_y : { type: "2f", value: [0., 1.] },
+            range_x : { type: "2f", value: [0., 1.] },
+            range_y : { type: "2f", value: [0., 1.] },
+            diffuse: {type: '3f', value: [1, 0, 0]},
+            opacity: {type: 'f', value: 1.0},
+        }
         this.scale_defines = {}
-        // ShaderLib.basic/dashed
-        this.material = new THREE.ShaderMaterial({
-            uniforms: this.uniforms,
-            vertexShader: THREE.ShaderChunk.meshbasic_vert,
-            fragmentShader: THREE.ShaderChunk.meshbasic_frag
-        });
+        this.material = new LineMaterial();
+        this.uniforms = this.material.uniforms = {...this.material.uniforms, ...this.uniforms};
 
         const result = await super.render();
         window.lastLinesGLView = this;
@@ -59,26 +54,28 @@ class LinesGLView extends bqplot.Lines {
         this.material.onBeforeCompile = (shader) => {
             // we include the scales header, and a snippet that uses the scales
             shader.vertexShader = "// added by bqplot-image-gl\n#include <scales>\n" + chunk_scales_extra + "// added by bqplot-image-gl\n" + shader.vertexShader;
-            // we modify the shader to include an extra snippet after this 'magic' line
-            const magic = '#include <morphtarget_vertex>';
-            const offset = shader.vertexShader.search(magic);
-            shader.vertexShader = shader.vertexShader.slice(0, offset) + chunk_scales_transform + shader.vertexShader.slice(offset);
-            shader.fragmentShader = shader.fragmentShader;
+            // we modify the shader to replace a piece
+            const begin = 'vec4 start = modelViewMatrix * vec4( instanceStart, 1.0 );'
+            const offset_begin = shader.vertexShader.indexOf(begin);
+            if (offset_begin == -1) {
+                console.error('Could not find magic begin line in shader');
+            }
+            const end = 'vec4 end = modelViewMatrix * vec4( instanceEnd, 1.0 );';
+            const offset_end = shader.vertexShader.indexOf(end);
+            if (offset_end == -1) {
+                console.error('Could not find magic end line in shader');
+            }
+            shader.vertexShader = shader.vertexShader.slice(0, offset_begin) + chunk_scales_transform + shader.vertexShader.slice(offset_end + end.length);
         };
         this._updateMaterialScales();
+        this.update_stroke_width();
 
-        this.geometry = new THREE.BufferGeometry();
+        this.geometry = new LineGeometry();
         this._updateGeometry();
-        this.line = new THREE.Line(this.geometry, this.material);
-        this.line.computeLineDistances();
+        this.line = new Line2(this.geometry, this.material);
 
         this.camera = new THREE.OrthographicCamera( 1 / - 2, 1 / 2, 1 / 2, 1 / - 2, -10000, 10000 );
         this.camera.position.z = 10;
-        // work in normalize coordinates (default for the scales)
-        this.camera.left  = -0.5;
-        this.camera.right = 0.5;
-        this.camera.bottom = -0.5;
-        this.camera.top = 0.5;
         this.camera.updateProjectionMatrix();
 
         this.scene = new THREE.Scene();
@@ -100,19 +97,24 @@ class LinesGLView extends bqplot.Lines {
         const current = new values.Values(scalar_names, [], get_value, sequence_index, vector4_names);
         current.ensure_array('z')
         current.merge_to_vec3(["x", "y", "z"], "position");
-        this.geometry.addAttribute( 'position', new THREE.Float32BufferAttribute(current.array_vec3['position'], 3)); 
+        this.geometry.setPositions(current.array_vec3['position'])
 
     }
 
     update_style() {
         const color = new THREE.Color(this.model.get('colors')[0]);
-        this.uniforms['diffuse'].value = color.toArray();
+        this.material.color = color.toArray();
         const opacities = this.model.get('opacities');
         if(opacities && opacities.length) {
             this.uniforms['opacity'].value = opacities[0];
         } else {
             this.uniforms['opacity'].value = 1.;
         }
+        this.update_scene();
+    }
+
+    update_stroke_width() {
+        this.material.linewidth = this.model.get('stroke_width')
         this.update_scene();
     }
 
@@ -144,6 +146,19 @@ class LinesGLView extends bqplot.Lines {
     render_gl() {
         var fig = this.parent;
         var renderer = fig.renderer;
+        this.camera.left = 0;
+        this.camera.right = fig.plotarea_width;
+        this.camera.bottom = 0;
+        this.camera.top = fig.plotarea_height;
+        this.camera.updateProjectionMatrix();
+
+        const x_scale = this.scales.x ? this.scales.x : this.parent.scale_x;
+        const y_scale = this.scales.y ? this.scales.y : this.parent.scale_y;
+        const range_x = this.parent.padded_range('x', x_scale.model);
+        const range_y = this.parent.padded_range('y', y_scale.model);
+        this.uniforms[`range_x`].value = range_x;
+        this.uniforms['resolution'].value = [fig.plotarea_width, fig.plotarea_height];
+        this.uniforms[`range_y`].value = [range_y[1], range_y[0]]; // flipped coordinates in WebGL
         renderer.render(this.scene, this.camera);
     }
 
