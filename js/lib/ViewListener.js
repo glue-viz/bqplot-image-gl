@@ -44,6 +44,9 @@ class ViewListenerModel extends base.DOMWidgetModel {
         this._cleanups.forEach((c) => c());
 
         const views = await this._getViews();
+        await Promise.all(views.map((view) => view.displayed));
+        await Promise.all(views.map((view) => view.layoutPromise));
+
         this.set('view_data', {}) // clear data
         const selector = this.get('css_selector');
         // initial fill
@@ -72,8 +75,12 @@ class ViewListenerModel extends base.DOMWidgetModel {
         views.forEach((view) => {
             let el = view.el;
             el = selector ? el.querySelector(selector) : el;
-            const {x, y, width, height} = el.getBoundingClientRect();
-            view_data[view.cid] = {x, y, width, height};
+            if(el) {
+                const {x, y, width, height} = el.getBoundingClientRect();
+                view_data[view.cid] = {x, y, width, height};
+            } else {
+                console.error('could not find element with css selector', selector);
+            }
         });
         this.set('view_data', view_data)
         this.save_changes();
