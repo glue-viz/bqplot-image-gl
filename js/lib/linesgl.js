@@ -21,7 +21,7 @@ const scaleTypeMap = {
 
 class LinesGLModel extends bqplot.LinesModel {
     defaults() {
-        return _.extend(bqplot.MarkModel.prototype.defaults(), {
+        return _.extend(bqplot.LinesModel.prototype.defaults(), {
             _model_name : 'LinesGLModel',
             _view_name : 'LinesGLView',
             _model_module : 'bqplot-image-gl',
@@ -97,6 +97,9 @@ class LinesGLView extends bqplot.Lines {
         const current = new values.Values(scalar_names, [], get_value, sequence_index, vector4_names);
         current.ensure_array('z')
         current.merge_to_vec3(["x", "y", "z"], "position");
+         // important to reset this, otherwise we may use an old buffered value
+         // Note that if we upgrade threejs, this may be named differently https://github.com/mrdoob/three.js/issues/18990
+        this.geometry.maxInstancedCount = undefined;
         this.geometry.setPositions(current.array_vec3['position'])
 
     }
