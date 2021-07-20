@@ -1,6 +1,6 @@
 {
   "name": "bqplot-image-gl",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "An ipywidget image widget for astronomical purposes",
   "author": "Maarten A. Breddels",
   "main": "lib/index.js",
