@@ -73,6 +73,7 @@ class LinesGLView extends bqplot.Lines {
         this.geometry = new LineGeometry();
         this._updateGeometry();
         this.line = new Line2(this.geometry, this.material);
+        this.line.frustumCulled = false;
 
         this.camera = new THREE.OrthographicCamera( 1 / - 2, 1 / 2, 1 / 2, 1 / - 2, -10000, 10000 );
         this.camera.position.z = 10;
