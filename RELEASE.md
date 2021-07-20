@@ -1,4 +1,13 @@
-- To release a new version of bqplot-image-gl on PyPI:
+# Using CI
+
+ * Update bqplot-image-gl/_version.py
+ * Update js/package.json
+ * Add and commit, e.g. `git add -u; git commit -m 'Update to version 1.4.3'`
+ * Tag: `git tag 1.4.3`
+ * Release using push: `git push upstream master 1.4.3`
+
+# Manual:
+## To release a new version of bqplot-image-gl on PyPI:
 
 Update _version.py (set release version, remove 'dev')
 git add the _version.py file and git commit
@@ -10,7 +19,7 @@ git add and git commit
 git push
 git push --tags
 
-- To release a new version of bqplot-image-gl on NPM:
+##  To release a new version of bqplot-image-gl on NPM:
 
 ```
 # clean out the `dist` and `node_modules` directories
