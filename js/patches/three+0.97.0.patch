@@ -1,0 +1,49 @@
+diff --git a/node_modules/three/build/three.module.js b/node_modules/three/build/three.module.js
+index c97c1dc..f67285a 100644
+--- a/node_modules/three/build/three.module.js
++++ b/node_modules/three/build/three.module.js
+@@ -3704,7 +3704,7 @@ var ImageUtils = {
+  * @author szimek / https://github.com/szimek/
+  */
+ 
+-var textureId = 0;
++var textureId = 0+10000;
+ 
+ function Texture( image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding ) {
+ 
+@@ -8138,7 +8138,7 @@ Object.assign( Layers.prototype, {
+  * @author elephantatwork / www.elephantatwork.ch
+  */
+ 
+-var object3DId = 0;
++var object3DId = 10000;
+ 
+ function Object3D() {
+ 
+@@ -9017,7 +9017,7 @@ Object3D.prototype = Object.assign( Object.create( EventDispatcher.prototype ),
+  * @author bhouston / http://clara.io
+  */
+ 
+-var geometryId = 0; // Geometry uses even numbers as Id
++var geometryId = 0+10000; // Geometry uses even numbers as Id
+ 
+ function Geometry() {
+ 
+@@ -11141,7 +11141,7 @@ function arrayMax( array ) {
+  * @author mrdoob / http://mrdoob.com/
+  */
+ 
+-var bufferGeometryId = 1; // BufferGeometry uses odd numbers as Id
++var bufferGeometryId = 1+10000; // BufferGeometry uses odd numbers as Id
+ 
+ function BufferGeometry() {
+ 
+@@ -12572,7 +12572,7 @@ PlaneBufferGeometry.prototype.constructor = PlaneBufferGeometry;
+  * @author alteredq / http://alteredqualia.com/
+  */
+ 
+-var materialId = 0;
++var materialId = 0+10000;
+ 
+ function Material() {
+ 
