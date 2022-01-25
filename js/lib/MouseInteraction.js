@@ -185,7 +185,7 @@ class MouseInteraction extends Interaction_1.Interaction {
             this.nextView.remove();
         }
         this.unbindEvents();
-        this.parent.off('margin_updated', this.updateScaleRanges);
+        this.parent.off('margin_updated', this.updateScaleRanges, this);
         this.parent.el.removeAttribute("tabindex");
         this._emitThrottled.flush();
     }
