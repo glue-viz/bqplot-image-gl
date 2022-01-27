@@ -52,7 +52,7 @@
     "lodash": "^4.17.4",
     "patch-package": "^6.4.7",
     "raw-loader": "~2.0.0",
-    "three": "^0.97.0"
+    "three": "^0.137.0"
   },
   "jupyterlab": {
     "extension": "lib/labplugin",
