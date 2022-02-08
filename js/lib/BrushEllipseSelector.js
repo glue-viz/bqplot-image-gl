@@ -9,7 +9,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const BaseXYSelector = __importStar(require("bqplot")).BaseXYSelector;
 const d3 = require("d3");
-const d3SelMulti = require("d3-selection-multi");
 const d3_drag_1 = require("d3-drag");
 const d3Selection = require("d3-selection");
 const { applyStyles } = require("./utils");
