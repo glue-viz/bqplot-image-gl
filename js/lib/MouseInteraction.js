@@ -160,11 +160,14 @@ class MouseInteraction extends Interaction_1.Interaction {
     }
 
     unbindEvents() {
-        const off = (name) => this.eventElement.on(this._eventName(name), null);
-        clickEvents.forEach(off);
-        keyEvents.forEach(off);
-        throttledEvents.forEach(off);
-        dragEvents.forEach(off);
+        // remove all event using the '.<name>'
+        this.eventElement.on(this._eventName(''), null);
+        d3.select(this.parent.el).on(this._eventName(''), null);
+        // d3-drag already uses the name .drag (we cannot use .${this.cid}}), so by doing this we also
+        // remove event handlers of other Interacts
+        // this is most likely another MouseInteraction, as long as wel reattach events when .next
+        // changes, this should not cause conflicts
+        this.drag.on('.drag', null);
     }
 
     eventEnabled(eventName) {
@@ -180,15 +183,28 @@ class MouseInteraction extends Interaction_1.Interaction {
         const next = this.model.get('next')
         if(this.nextView) {
             this.nextView.remove();
+            // if this.nextView was a MouseInteraction, it probably removed our event
+            // handers in its own unbindEvents. So we reset our own event handlers.
+            this.unbindEvents();
+            this.bindEvents();
         }
         if(!next) {
             return;
         }
-        this.nextView = await this.parent.create_child_view(next);
-        this.parent.interaction.node().appendChild(this.nextView.el);
-        this.parent.displayed.then(() => {
-            this.nextView.trigger("displayed");
-        });
+        const nextView = await this.parent.create_child_view(next);
+        // because we awaited, if could be that in the meantime our 'next' is already changed.
+        if(next !== this.model.get('next')) {
+            // in that is the case, we do the same as above in `if(this.nextView)`
+            nextView.remove()
+            this.unbindEvents();
+            this.bindEvents();
+        } else {
+            this.nextView = nextView;
+            this.parent.interaction.node().appendChild(this.nextView.el);
+            this.parent.displayed.then(() => {
+                this.nextView.trigger("displayed");
+            });
+        }
     }
 
     updateScaleRanges() {
