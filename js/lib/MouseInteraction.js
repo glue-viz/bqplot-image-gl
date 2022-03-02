@@ -41,7 +41,10 @@ exports.MouseInteractionModel = MouseInteractionModel;
 class MouseInteraction extends Interaction_1.Interaction {
     async render() {
         super.render();
+        // we actually attach to the parent node, not our own .el
+        // so we get all events, even when for instance a PanZoom instance is used for .next
         this.eventElement = d3.select(this.parent.interaction.node());
+        this.drag = d3_drag_1.drag();
         this.nextView = null;
         this.x_scale = await this.create_child_view(this.model.get("x_scale"));
         this.y_scale = await this.create_child_view(this.model.get("y_scale"));
@@ -71,23 +74,30 @@ class MouseInteraction extends Interaction_1.Interaction {
     }
 
     bindEvents() {
-        const events = this.model.get("events");
-        // we don't want to bind these events if we don't need them, because drag events
-        // can call stop propagation
-        if (this.eventEnabled("dragstart") || this.eventEnabled("dragmove") || this.eventEnabled("dragend")) {
-            this.eventElement.call(d3_drag_1.drag().on(this._eventName("start"), () => {
+        // drag events
+        if (this.eventEnabled("dragstart")) {
+            this.eventElement.call(this.drag.on(this._eventName("start"), () => {
                 const e = d3GetEvent();
                 this._emit('dragstart', { x: e.x, y: e.y });
-            }).on(this._eventName("drag"), () => {
+            }));
+        }
+        if (this.eventEnabled("dragmove")) {
+            this.eventElement.call(this.drag.on(this._eventName("drag"), () => {
                 const e = d3GetEvent();
                 this._emit('dragmove', { x: e.x, y: e.y });
-            }).on(this._eventName("end"), () => {
+            }));
+        }
+        if (this.eventEnabled("dragend")) {
+            this.eventElement.call(this.drag.on(this._eventName("end"), () => {
                 const e = d3GetEvent();
                 this._emit('dragend', { x: e.x, y: e.y });
             }));
         }
         // and click events
         clickEvents.forEach(eventName => {
+            if(!this.eventEnabled(eventName)) {
+                return
+            }
             this.eventElement.on(this._eventName(eventName), () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 if (eventName !== 'mouseleave') {
@@ -113,6 +123,9 @@ class MouseInteraction extends Interaction_1.Interaction {
             });
         });
         keyEvents.forEach(eventName => {
+            if(!this.eventEnabled(eventName)) {
+                return
+            }
             d3.select(this.parent.el).on(this._eventName(eventName), () => {
                 this._emitThrottled.flush();  // we don't want mousemove events to come after enter/leave
                 const e = d3GetEvent();
@@ -127,6 +140,9 @@ class MouseInteraction extends Interaction_1.Interaction {
         });
         // throttled events
         throttledEvents.forEach(eventName => {
+            if(!this.eventEnabled(eventName)) {
+                return
+            }
             this.eventElement.on(this._eventName(eventName), () => {
                 const e = d3GetEvent();
                 // to be consistent with drag events, we need to user clientPoint
