@@ -44,8 +44,18 @@ class LinesGLView extends bqplot.Lines {
             opacity: {type: 'f', value: 1.0},
         }
         this.scale_defines = {}
-        this.material = new LineMaterial();
+        this.material = new LineMaterial({
+            blending: THREE.CustomBlending,
+            blendSrc: THREE.OneFactor,
+            blendDst: THREE.OneMinusSrcAlphaFactor,
+            blendEquation: THREE.AddEquation,
+            transparent: true,
+            // this causes the overdraw of the line caps and joins (circles)
+            // to not overdraw, causing transparancy to show the circles
+            depthFunc: THREE.LessDepth,
+        });
         this.uniforms = this.material.uniforms = {...this.material.uniforms, ...this.uniforms};
+
 
         const result = await super.render();
         window.lastLinesGLView = this;
@@ -163,6 +173,10 @@ class LinesGLView extends bqplot.Lines {
         this.uniforms[`range_x`].value = range_x;
         this.uniforms['resolution'].value = [fig.plotarea_width, fig.plotarea_height];
         this.uniforms[`range_y`].value = [range_y[1], range_y[0]]; // flipped coordinates in WebGL
+        // every line cleans the depth buffer, since we have to draw with depthFunc: THREE.LessDepth
+        // if we don't do this, we will not overdraw on other lines
+        // A possible alternative would be to give each mark a z value according to index in Figure.marks
+        renderer.clearDepth();
         renderer.render(this.scene, this.camera);
     }
 
