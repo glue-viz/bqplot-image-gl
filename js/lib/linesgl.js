@@ -85,6 +85,16 @@ class LinesGLView extends bqplot.Lines {
 
         return result;
     }
+
+    create_listeners() {
+        super.create_listeners();
+        var sync_visible = () => {
+            this.material.visible = this.model.get('visible');
+            this.update_scene();
+        };
+        this.listenTo(this.model, "change:visible", sync_visible , this);
+    }
+    
     _updateGeometry() {
         const scalar_names = ["x", "y", "z"];
         const vector4_names = [];
