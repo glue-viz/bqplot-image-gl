@@ -13,9 +13,9 @@ Or
 ## Manual bump
  * Update bqplot-image-gl/_version.py
  * Update js/package.json
- * Add and commit, e.g. `git add -u; git commit -m 'Update to version 1.4.7'`
- * Tag: `git tag 1.4.7`
- * Release using push: `git push upstream master 1.4.7`
+ * Add and commit, e.g. `git add -u; git commit -m 'Update to version 1.4.8'`
+ * Tag: `git tag 1.4.8`
+ * Release using push: `git push upstream master 1.4.8`
 
 # Manual:
 ## To release a new version of bqplot-image-gl on PyPI:
