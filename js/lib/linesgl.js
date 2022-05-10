@@ -11,6 +11,7 @@ var LineMaterial = require('./examples/lines/LineMaterial').LineMaterial;
 var LineGeometry = require('./examples/lines/LineGeometry').LineGeometry;
 
 
+const chunk_scales = require('raw-loader!../shaders/scales-delta.glsl').default;
 const chunk_scales_extra = require('raw-loader!../shaders/scales-extra.glsl').default;
 const chunk_scales_transform = require('raw-loader!../shaders/scales-transform.glsl').default;
 
@@ -36,8 +37,9 @@ class LinesGLView extends bqplot.Lines {
 
     async render() {
         this.uniforms = {
-            domain_x : { type: "2f", value: [0., 1.] },
-            domain_y : { type: "2f", value: [0., 1.] },
+            // 3rd element is delta
+            domain_x : { type: "3f", value: [0., 1., 1.] },
+            domain_y : { type: "3f", value: [0., 1., 1.] },
             range_x : { type: "2f", value: [0., 1.] },
             range_y : { type: "2f", value: [0., 1.] },
             diffuse: {type: '3f', value: [1, 0, 0]},
@@ -63,7 +65,7 @@ class LinesGLView extends bqplot.Lines {
 
         this.material.onBeforeCompile = (shader) => {
             // we include the scales header, and a snippet that uses the scales
-            shader.vertexShader = "// added by bqplot-image-gl\n#include <scales>\n" + chunk_scales_extra + "// added by bqplot-image-gl\n" + shader.vertexShader;
+            shader.vertexShader = "// added by bqplot-image-gl\n" + chunk_scales +  chunk_scales_extra + "// added by bqplot-image-gl\n" + shader.vertexShader;
             // we modify the shader to replace a piece
             const begin = 'vec4 start = modelViewMatrix * vec4( instanceStart, 1.0 );'
             const offset_begin = shader.vertexShader.indexOf(begin);
@@ -146,7 +148,13 @@ class LinesGLView extends bqplot.Lines {
         const scales = {x: this.scales.x.model, y: this.scales.y.model}
         const new_scale_defines = {...this.scale_defines};
         for (const key of Object.keys(scales)) {
-            this.uniforms[`domain_${key}`].value = scales[key].domain;
+            const domain = scales[key].domain
+            let delta = domain[1] - domain[0];
+            // see scales-delta.glsl
+            if(scales[key].type == 'log') {
+                delta = Math.log(domain[1]) - Math.log(domain[0]);
+            }
+            this.uniforms[`domain_${key}`].value = [domain[0], domain[1], delta];
             new_scale_defines[`SCALE_TYPE_${key}`] = scaleTypeMap[scales[key].type];
         }
         if (!_.isEqual(this.scale_defines, new_scale_defines) ) {
