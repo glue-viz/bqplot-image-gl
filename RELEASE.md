@@ -1,5 +1,16 @@
 # Using CI
 
+## Auto bump
+
+Use
+
+   $ ./release.sh minor
+
+Or
+
+    $ ./release.sh patch
+
+## Manual bump
  * Update bqplot-image-gl/_version.py
  * Update js/package.json
  * Add and commit, e.g. `git add -u; git commit -m 'Update to version 1.4.7'`
