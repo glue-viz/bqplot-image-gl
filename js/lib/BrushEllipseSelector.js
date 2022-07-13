@@ -97,6 +97,16 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style', () => this.updateEllipse());
         this.listenTo(this.model, 'change:selected_x change:selected_y', this.syncSelectionToMarks);
     }
+    update_xscale_domain() {
+        super.update_xscale_domain();
+        if(this.x_scale && this.y_scale && this.d3ellipse)
+            this.updateEllipse();
+    }
+    update_yscale_domain() {
+        super.update_yscale_domain();
+        if(this.x_scale && this.y_scale && this.d3ellipse)
+            this.updateEllipse();
+    }
     relayout() {
         super.relayout();
         this.x_scale.set_range(this.parent.padded_range("x", this.x_scale.model));
