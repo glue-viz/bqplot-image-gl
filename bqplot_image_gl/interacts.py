@@ -99,5 +99,5 @@ class MouseInteraction(Interaction):
     cursor = Unicode('auto').tag(sync=True)
     move_throttle = Int(50).tag(sync=True)
     next = Instance(Interaction, allow_none=True).tag(sync=True, **widget_serialization)
-    events = List(Unicode, default_value=drag_events + mouse_events + keyboard_events,
+    events = List(Unicode(), default_value=drag_events + mouse_events + keyboard_events,
                   allow_none=True).tag(sync=True)
