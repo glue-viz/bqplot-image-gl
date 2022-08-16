@@ -16,12 +16,13 @@ class ViewListenerModel extends base.DOMWidgetModel {
             _view_module_version: version,
             widget: null,
             css_selector: null,
-            view_data: {}
+            view_data: {},
         });
     }
     initialize(attributes, options) {
         super.initialize(attributes, options);
         this._cleanups = [];
+        this.knownViews = new Set()
         const bind = (widgetModel) => {
             // similar to ipyevents we use the _view_count to track when the views are changing
             const viewCount = widgetModel.get('_view_count');
@@ -42,6 +43,7 @@ class ViewListenerModel extends base.DOMWidgetModel {
     async _updateViews() {
         // remove old listeners
         this._cleanups.forEach((c) => c());
+        this._cleanups = [];
 
         const views = await this._getViews();
         await Promise.all(views.map((view) => view.displayed));
@@ -71,19 +73,31 @@ class ViewListenerModel extends base.DOMWidgetModel {
     async _updateViewData() {
         const views = await this._getViews();
         const selector = this.get('css_selector');
-        const view_data = {}
+        const currentViews = new Set();
         views.forEach((view) => {
+            currentViews.add(view.cid);
+            this.knownViews.add(view.cid);
             let el = view.el;
             el = selector ? el.querySelector(selector) : el;
             if(el) {
                 const {x, y, width, height} = el.getBoundingClientRect();
-                view_data[view.cid] = {x, y, width, height};
+                this.send({
+                    event: 'set_view_data',
+                    id: view.cid,
+                    data: { x, y, width, height},
+                })
             } else {
                 console.error('could not find element with css selector', selector);
             }
         });
-        this.set('view_data', view_data)
-        this.save_changes();
+        const removeViews = [...this.knownViews].filter((cid) => !currentViews.has(cid));
+        removeViews.forEach((cid) => {
+            this.send({
+                event: 'remove_view_data',
+                id: cid,
+            });
+            this.knownViews.delete(cid);
+        });
     }
 }
 
