@@ -1,0 +1,91 @@
+name: Update Galata References
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  update-galata-references:
+    name: Update Galata References
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'update galata') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+      - name: Checkout the branch from the PR that triggered the job
+        run: hub pr checkout ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install twine wheel jupyter-packaging jupyterlab .
+
+      - name: Install Galata
+        run: |
+          yarn install
+          yarn playwright install chromium
+        working-directory: ui-tests
+
+      - name: Launch JupyterLab
+        run: yarn run start:detached
+        working-directory: ui-tests
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8988/api
+          timeout: 20000
+
+      - name: Generate updated Galata References
+        env:
+          TARGET_URL: http://127.0.0.1:8988
+        run: yarn run test:update
+        working-directory: ui-tests
+
+      - name: Compress screenshots
+        run: |
+          sudo apt install optipng
+          optipng *.png
+        working-directory: ui-tests/tests/bqplot-image-gl.test.ts-snapshots
+
+      - name: Commit reference images
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git pull
+
+          git add ui-tests/tests/bqplot-image-gl.test.ts-snapshots
+
+          git commit -m "chore: Update Galata References"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
