@@ -37,6 +37,7 @@ class ImageGL(bqplot.Mark):
                                         atype='bqplot.Axis',
                                         **array_serialization)\
         .valid(array_squeeze, shape(2))
+    transform = List([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], allow_none=False).tag(sync=True)
     scales_metadata = Dict({
         'x': {'orientation': 'horizontal', 'dimension': 'x'},
         'y': {'orientation': 'vertical', 'dimension': 'y'},
