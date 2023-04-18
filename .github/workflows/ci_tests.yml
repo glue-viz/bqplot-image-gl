@@ -110,6 +110,7 @@ jobs:
           coverage: false
 
         - linux: py36-test
+          runs-on: ubuntu-20.04
         - linux: py38-test
 
         - macos: py37-test
