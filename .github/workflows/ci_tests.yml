@@ -110,12 +110,12 @@ jobs:
           coverage: false
 
         - linux: py36-test
+          runs-on: ubuntu-20.04
         - linux: py38-test
 
         - macos: py37-test
         - macos: py310-test
 
-        - windows: py36-test
         - windows: py39-test
 
         - linux: py38-notebooks
