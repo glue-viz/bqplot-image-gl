@@ -27,6 +27,8 @@ class ImageGLModel extends bqplot.MarkModel {
             opacity: 1.0,
             x: (0.0, 1.0),
             y: (0.0, 1.0),
+            // flat 3x3 identity matrix
+            transform: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
             scales_metadata: {
                 'x': {'orientation': 'horizontal', 'dimension': 'x'},
                 'y': {'orientation': 'vertical', 'dimension': 'y'},
@@ -114,6 +116,8 @@ class ImageGLView extends bqplot.Mark {
                         // basically the corners of the image
                         image_domain_x  : { type: "2f", value: [0.0, 1.0] },
                         image_domain_y  : { type: "2f", value: [0.0, 1.0] },
+                        // transform matrix
+                        transform : { type: "mat3", value: this.model.get("transform") },
                         // extra opacity value
                         opacity: {type: 'f', value: 1.0}
                     },
@@ -200,6 +204,10 @@ class ImageGLView extends bqplot.Mark {
         };
         this.listenTo(this.model, "change:visible", sync_visible , this);
         sync_visible();
+        this.listenTo(this.model, "change:transform", () => {
+            this.update_transform();
+            this.update_scene();
+        }, this);
         this.listenTo(this.model, "change:opacity", () => {
             this.update_opacity();
             this.update_scene();
@@ -233,6 +241,11 @@ class ImageGLView extends bqplot.Mark {
             max = 0;
         this.image_material.uniforms.color_min.value = min;
         this.image_material.uniforms.color_max.value = max;
+    }
+
+    update_transform() {
+        var transform = this.model.get('transform');
+        this.image_material.uniforms.transform.value = transform;
     }
 
     update_opacity() {
