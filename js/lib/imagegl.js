@@ -38,7 +38,22 @@ class ImageGLModel extends bqplot.MarkModel {
         super.initialize(attributes, options);
         this.on_some_change(['x', 'y'], this.update_data, this);
         this.on_some_change(["preserve_domain"], this.update_domains, this);
+        this.listenTo(this, "change:image", () => {
+            const previous = this.previous("image");
+            if(previous.image && previous.image.src) {
+                URL.revokeObjectURL(previous.image.src);
+            }
+        }, this);
+
         this.update_data();
+    }
+
+    close(comm_closed) {
+        const image = this.get("image");
+        if(image.image && image.image.src) {
+            URL.revokeObjectURL(previous.image.src);
+        }
+        return super.close(comm_closed);
     }
 
     update_data() {
@@ -79,9 +94,24 @@ ImageGLModel.serializers = Object.assign({}, bqplot.MarkModel.serializers,
                                          { x: serialize.array_or_json,
                                            y: serialize.array_or_json,
                                            image: {
-                                                deserialize: (obj, manager) => {
-                                                    let state = {buffer: obj.value, dtype: obj.dtype, shape: obj.shape};
-                                                    return jupyter_dataserializers.JSONToArray(state);
+                                                deserialize: async (obj, manager) => {
+                                                    if(obj.type == "image") {
+                                                        // the data is encoded in an image with LA format
+                                                        // luminance for the intensity, alpha for the mask
+                                                        let image = new Image();
+                                                        const blob = new Blob([obj.data], {type: `image/${obj.format}`});
+                                                        const url = URL.createObjectURL(blob);
+                                                        image.src = url;
+                                                        await new Promise((resolve, reject) => {
+                                                            image.onload = resolve;
+                                                            image.onerror = reject;
+                                                        } );
+                                                        return {image, min: obj.min, max: obj.max, use_colormap: obj.use_colormap};
+                                                    } else {
+                                                        // otherwise just a 'normal' ndarray
+                                                        let state = {buffer: obj.value, dtype: obj.dtype, shape: obj.shape};
+                                                        return jupyter_dataserializers.JSONToArray(state);
+                                                    }
                                                 },
                                                 serialize: (ar) => {
                                                     const {buffer, dtype, shape} = jupyter_dataserializers.arrayToJSON(ar);
@@ -114,6 +144,10 @@ class ImageGLView extends bqplot.Mark {
                         // basically the corners of the image
                         image_domain_x  : { type: "2f", value: [0.0, 1.0] },
                         image_domain_y  : { type: "2f", value: [0.0, 1.0] },
+                        // in the case we use an image for the values, the image is normalized, and we need to scale
+                        // it back to a particular image range
+                        // This needs to be set to [0, 1] for array data (which is not normalized)
+                        range_image  : { type: "2f", value: [0.0, 1.0] },
                         // extra opacity value
                         opacity: {type: 'f', value: 1.0}
                     },
@@ -280,39 +314,56 @@ class ImageGLView extends bqplot.Mark {
     update_image(skip_render) {
         var image = this.model.get("image");
         var type = null;
-        var data = image.data;
-        if(data instanceof Uint8Array) {
-            type =  THREE.UnsignedByteType;
-        } else if(data instanceof Float64Array) {
-            console.warn('ImageGLView.data is a Float64Array which WebGL does not support, will convert to a Float32Array (consider sending float32 data for better performance).');
-            data = Float32Array.from(data);
-            type =  THREE.FloatType;
-        } else if(data instanceof Float32Array) {
-            type =  THREE.FloatType;
-        } else {
-            console.error('only types uint8 and float32 are supported');
-            return;
-        }
-        if(this.scales.image.model.get('scheme') && image.shape.length == 2) {
-            if(this.texture)
+        if(image.image) {
+            // the data is encoded in an image with LA format
+            if(this.texture) {
                 this.texture.dispose();
-            this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.LuminanceFormat, type);
+            }
+            this.texture = new THREE.Texture(image.image);
             this.texture.needsUpdate = true;
+            this.texture.flipY = false;
             this.image_material.uniforms.image.value = this.texture;
-            this.image_material.defines.USE_COLORMAP = true;
+            this.image_material.defines.USE_COLORMAP = image.use_colormap;
             this.image_material.needsUpdate = true;
-        } else if(image.shape.length == 3) {
-            this.image_material.defines.USE_COLORMAP = false;
-            if(this.texture)
-                this.texture.dispose();
-            if(image.shape[2] == 3)
-                this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.RGBFormat, type);
-            if(image.shape[2] == 4)
-                this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.RGBAFormat, type);
-            this.texture.needsUpdate = true;
-            this.image_material.uniforms.image.value = this.texture;
+            this.image_material.uniforms.range_image.value = [image.min, image.max];
         } else {
-            console.error('image data not understood');
+            // we are not dealing with an image, but with an array
+            // which is not normalized, so we can reset the range_image
+            this.image_material.uniforms.range_image.value = [0, 1];
+            var data = image.data;
+            if(data instanceof Uint8Array) {
+                type =  THREE.UnsignedByteType;
+            } else if(data instanceof Float64Array) {
+                console.warn('ImageGLView.data is a Float64Array which WebGL does not support, will convert to a Float32Array (consider sending float32 data for better performance).');
+                data = Float32Array.from(data);
+                type =  THREE.FloatType;
+            } else if(data instanceof Float32Array) {
+                type =  THREE.FloatType;
+            } else {
+                console.error('only types uint8 and float32 are supported');
+                return;
+            }
+            if(this.scales.image.model.get('scheme') && image.shape.length == 2) {
+                if(this.texture)
+                    this.texture.dispose();
+                this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.LuminanceFormat, type);
+                this.texture.needsUpdate = true;
+                this.image_material.uniforms.image.value = this.texture;
+                this.image_material.defines.USE_COLORMAP = true;
+                this.image_material.needsUpdate = true;
+            } else if(image.shape.length == 3) {
+                this.image_material.defines.USE_COLORMAP = false;
+                if(this.texture)
+                    this.texture.dispose();
+                if(image.shape[2] == 3)
+                    this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.RGBFormat, type);
+                if(image.shape[2] == 4)
+                    this.texture = new THREE.DataTexture(data, image.shape[1], image.shape[0], THREE.RGBAFormat, type);
+                this.texture.needsUpdate = true;
+                this.image_material.uniforms.image.value = this.texture;
+            } else {
+                console.error('image data not understood');
+            }
         }
         this.texture.magFilter = interpolations[this.model.get('interpolation')];
         this.texture.minFilter = interpolations[this.model.get('interpolation')];

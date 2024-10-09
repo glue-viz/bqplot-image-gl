@@ -51,7 +51,8 @@ setup(
     include_package_data=True,
     install_requires=[
         'ipywidgets>=7.0.0',
-        'bqplot>=0.12'
+        'bqplot>=0.12',
+        'pillow',
     ],
     packages=find_packages(),
     zip_safe=False,
