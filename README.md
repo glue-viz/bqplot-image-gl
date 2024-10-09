@@ -5,6 +5,17 @@ Used for https://github.com/glue-viz/glue-jupyter
 
 (currently requires latest developer version of bqplot)
 
+## Usage
+
+### ImageGL
+
+See https://py.cafe/maartenbreddels/bqplot-image-gl-demo for a demo of the ImageGL widget.
+
+Preview image:
+![preview image](https://py.cafe/preview/maartenbreddels/bqplot-image-gl-demo)
+
+
+
 # Installation
 
 To install use pip:

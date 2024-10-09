@@ -1,3 +1,4 @@
+import os
 import ipywidgets as widgets
 import bqplot
 from traittypes import Array
@@ -6,8 +7,13 @@ from traitlets import Int, Unicode, List, Dict, Float, Instance
 from bqplot.marks import shape
 from bqplot.traits import array_to_json, array_from_json
 from bqplot_image_gl._version import __version__
+from .serialize import image_data_serialization
 
 __all__ = ['ImageGL', 'Contour']
+
+
+# can be 'png', 'webp' or 'none'
+DEFAULT_IMAGE_DATA_COMPRESSION = os.environ.get("BQPLOT_IMAGE_GL_IMAGE_DATA_COMPRESSION", "none")
 
 
 @widgets.register
@@ -24,7 +30,8 @@ class ImageGL(bqplot.Mark):
                         scaled=True,
                         rtype='Color',
                         atype='bqplot.ColorAxis',
-                        **array_serialization)
+                        **image_data_serialization)
+    compression = Unicode(DEFAULT_IMAGE_DATA_COMPRESSION, allow_none=True).tag(sync=True)
     interpolation = Unicode('nearest', allow_none=True).tag(sync=True)
     opacity = Float(1.0).tag(sync=True)
     x = Array(default_value=(0, 1)).tag(sync=True, scaled=True,

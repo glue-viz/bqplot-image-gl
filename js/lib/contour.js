@@ -34,19 +34,40 @@ class ContourModel extends bqplot.MarkModel {
         this.update_data();
     }
 
-    update_data() {
+    async update_data() {
         const image_widget = this.get('image');
         const level = this.get('level')
         // we support a single level or multiple
         this.thresholds = Array.isArray(level) ? level : [level];
         if(image_widget) {
                 const image = image_widget.get('image')
-                this.width = image.shape[1];
-                this.height = image.shape[0];
+                let data = null;
+                if(image.image) {
+                    const imageNode = image.image;
+                    this.width = imageNode.width;
+                    this.height = imageNode.height;
+                    // conver the image to a typed array using canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = this.width
+                    canvas.height = this.height
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(imageNode, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, imageNode.width, imageNode.height);
+                    const {min, max}  = image;
+                    // use the r channel as the data, and scale to the range
+                    data = new Float32Array(imageData.data.length / 4);
+                    for(var i = 0; i < data.length; i++) {
+                        data[i] = (imageData.data[i*4] / 255) * (max - min) + min;
+                    }
+                } else {
+                    this.width = image.shape[1];
+                    this.height = image.shape[0];
+                    data = image.data;
+                }
                 this.contours = this.thresholds.map((threshold) => d3contour
                                                     .contours()
                                                     .size([this.width, this.height])
-                                                    .contour(image.data, [threshold])
+                                                    .contour(data, [threshold])
                                                     )
         } else {
             this.width = 1;   // precomputed contour_lines will have to be in normalized
