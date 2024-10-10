@@ -66,7 +66,7 @@ jobs:
           echo $PWD
           ls -al .
           ls -al dist/
-          pip install dist/bqplot_image_gl*.whl jupyterlab "pytest-ipywidgets[solara]"
+          pip install dist/bqplot_image_gl*.whl "jupyterlab<4" "pytest-ipywidgets[solara]"
 
       - name: Install playwright
         run: |
