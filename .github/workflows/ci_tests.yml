@@ -66,7 +66,15 @@ jobs:
           echo $PWD
           ls -al .
           ls -al dist/
-          pip install dist/bqplot_image_gl*.whl jupyterlab
+          pip install dist/bqplot_image_gl*.whl jupyterlab "pytest-ipywidgets[solara]"
+
+      - name: Install playwright
+        run: |
+          playwright install chromium
+
+      - name: Run visual regression tests
+        run: |
+          pytest tests/ui
 
       - name: Install Galata
         run: |
@@ -98,6 +106,7 @@ jobs:
           path: |
             ui-tests/playwright-report
             ui-tests/test-results
+            test-results
 
   tests:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
