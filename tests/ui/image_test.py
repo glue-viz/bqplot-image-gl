@@ -1,32 +1,35 @@
 import ipywidgets as widgets
 import playwright.sync_api
 from IPython.display import display
-import numpy as np
-from bqplot import Figure, LinearScale, Axis, ColorScale
-from bqplot_image_gl import ImageGL
 
 
-def test_widget_image(solara_test, page_session: playwright.sync_api.Page, assert_solara_snapshot):
 
-    scale_x = LinearScale(min=0, max=1)
-    scale_y = LinearScale(min=0, max=1)
-    scales = {"x": scale_x, "y": scale_y}
-    axis_x = Axis(scale=scale_x, label="x")
-    axis_y = Axis(scale=scale_y, label="y", orientation="vertical")
+def test_widget_image(ipywidgets_runner, page_session: playwright.sync_api.Page, assert_solara_snapshot):
 
-    figure = Figure(scales=scales, axes=[axis_x, axis_y])
+    def kernel_code():
+        import numpy as np
+        from bqplot import Figure, LinearScale, Axis, ColorScale
+        from bqplot_image_gl import ImageGL
+        scale_x = LinearScale(min=0, max=1)
+        scale_y = LinearScale(min=0, max=1)
+        scales = {"x": scale_x, "y": scale_y}
+        axis_x = Axis(scale=scale_x, label="x")
+        axis_y = Axis(scale=scale_y, label="y", orientation="vertical")
 
-    scales_image = {"x": scale_x, "y": scale_y, "image": ColorScale(min=0, max=2)}
+        figure = Figure(scales=scales, axes=[axis_x, axis_y])
 
-    data = np.array([[0., 1.], [2., 3.]])
-    image = ImageGL(image=data, scales=scales_image)
+        scales_image = {"x": scale_x, "y": scale_y, "image": ColorScale(min=0, max=2)}
 
-    figure.marks = (image,)
+        data = np.array([[0., 1.], [2., 3.]])
+        image = ImageGL(image=data, scales=scales_image)
 
-    display(figure)
+        figure.marks = (image,)
 
+        display(figure)
 
+    ipywidgets_runner(kernel_code)
     svg = page_session.locator(".bqplot")
     svg.wait_for()
-    # page_session.wait_for_timeout(1000)
+    # make sure the image is rendered
+    page_session.wait_for_timeout(100)
     assert_solara_snapshot(svg.screenshot())
