@@ -50,12 +50,6 @@ jobs:
           name: bqplot-image-gl-dist-${{ github.run_number }}
           path: ./dist
 
-      - name: Install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Install Python
         uses: actions/setup-python@v2
         with:
@@ -66,7 +60,7 @@ jobs:
           echo $PWD
           ls -al .
           ls -al dist/
-          pip install dist/bqplot_image_gl*.whl "jupyterlab<4" "pytest-ipywidgets[solara]"
+          pip install dist/bqplot_image_gl*.whl "pytest-ipywidgets[all]"
 
       - name: Install playwright
         run: |
@@ -76,36 +70,12 @@ jobs:
         run: |
           pytest tests/ui
 
-      - name: Install Galata
-        run: |
-          yarn install
-          yarn playwright install chromium
-        working-directory: ui-tests
-
-      - name: Launch JupyterLab
-        run: yarn run start:detached
-        working-directory: ui-tests
-
-      - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8988/api
-          timeout: 20000
-
-      - name: Run UI Tests
-        env:
-          TARGET_URL: http://127.0.0.1:8988
-        run: yarn run test
-        working-directory: ui-tests
-
       - name: Upload UI Test artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: ui-test-output
+          name: bqplot-image-gl-ui-test-output
           path: |
-            ui-tests/playwright-report
-            ui-tests/test-results
             test-results
 
   tests:
