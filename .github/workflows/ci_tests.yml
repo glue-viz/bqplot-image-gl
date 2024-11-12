@@ -93,15 +93,18 @@ jobs:
         - linux: codestyle
           coverage: false
 
-        - linux: py39-test
+        - linux: py36-test
           runs-on: ubuntu-20.04
+        - linux: py38-test
         - linux: py313-test
 
+        - macos: py37-test
         - macos: py310-test
         - macos: py312-test
 
+        - windows: py39-test
         - windows: py311-test
 
-        - linux: py312-notebooks
-        - macos: py310-notebooks
-        - windows: py311-notebooks
+        - linux: py38-notebooks
+        - macos: py37-notebooks
+        - windows: py39-notebooks
