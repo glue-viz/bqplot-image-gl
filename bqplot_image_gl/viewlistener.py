@@ -2,7 +2,8 @@ import ipywidgets as widgets
 from ipywidgets.widgets import widget_serialization
 from traitlets import Unicode, Dict, Instance
 from bqplot_image_gl._version import __version__
-from typing import TypedDict, cast, Dict as DictType
+from typing import cast, Dict as DictType
+from typing_extensions import TypedDict
 
 __all__ = ['ViewListener']
 
@@ -12,6 +13,8 @@ class ViewDataEntry(TypedDict):
     y: float
     width: float
     height: float
+    resized_at: str  # ISO 8601
+    focused_at: str  # ISO 8601
 
 
 @widgets.register
