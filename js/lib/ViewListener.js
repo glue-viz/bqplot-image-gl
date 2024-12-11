@@ -52,12 +52,12 @@ class ViewListenerModel extends base.DOMWidgetModel {
         this.set('view_data', {}) // clear data
         const selector = this.get('css_selector');
         // initial fill
-        this._updateViewData();
+        this._updateAllViewData();
 
         // listen to element for resize events
         views.forEach((view) => {
             const resizeObserver = new ResizeObserver(entries => {
-                this._updateViewData();
+                this._updateViewData(view);
             });
             let el = view.el;
             el = selector ? el.querySelector(selector) : el;
@@ -70,25 +70,28 @@ class ViewListenerModel extends base.DOMWidgetModel {
             }
         })
     }
-    async _updateViewData() {
-        const views = await this._getViews();
+    async _updateViewData(view) {
         const selector = this.get('css_selector');
+        let el = view.el;
+        el = selector ? el.querySelector(selector) : el;
+        if(el) {
+            const {x, y, width, height} = el.getBoundingClientRect();
+            this.send({
+                event: 'set_view_data',
+                id: view.cid,
+                data: { x, y, width, height, resized_at, focused_at },
+            })
+        } else {
+            console.error('could not find element with css selector', selector);
+        }
+    }
+    async _updateAllViewData() {
+        const views = await this._getViews();
         const currentViews = new Set();
         views.forEach((view) => {
             currentViews.add(view.cid);
             this.knownViews.add(view.cid);
-            let el = view.el;
-            el = selector ? el.querySelector(selector) : el;
-            if(el) {
-                const {x, y, width, height} = el.getBoundingClientRect();
-                this.send({
-                    event: 'set_view_data',
-                    id: view.cid,
-                    data: { x, y, width, height},
-                })
-            } else {
-                console.error('could not find element with css selector', selector);
-            }
+            this._updateViewData(view, true, true);
         });
         const removeViews = [...this.knownViews].filter((cid) => !currentViews.has(cid));
         removeViews.forEach((cid) => {
