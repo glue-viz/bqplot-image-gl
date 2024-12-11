@@ -34,6 +34,9 @@ class ViewListenerModel extends base.DOMWidgetModel {
         }
         bind(this.get('widget'));
         window.lastViewListenerModel = this;
+        window.addEventListener('focus', () => {
+            this._updateAllViewData();
+        });
     }
     async _getViews() {
         const widgetModel = this.get('widget');
@@ -57,7 +60,7 @@ class ViewListenerModel extends base.DOMWidgetModel {
         // listen to element for resize events
         views.forEach((view) => {
             const resizeObserver = new ResizeObserver(entries => {
-                this._updateViewData(view);
+                this._updateViewData(view, true);
             });
             let el = view.el;
             el = selector ? el.querySelector(selector) : el;
@@ -70,12 +73,22 @@ class ViewListenerModel extends base.DOMWidgetModel {
             }
         })
     }
-    async _updateViewData(view) {
+    async _updateViewData(view, resized=false, focused=false) {
         const selector = this.get('css_selector');
         let el = view.el;
         el = selector ? el.querySelector(selector) : el;
         if(el) {
             const {x, y, width, height} = el.getBoundingClientRect();
+            const previousData = this.get('view_data');
+            let resized_at = previousData[view.cid]?.resized_at;
+            let focused_at = previousData[view.cid]?.focused_at;
+            const currentDateTimeJSISO = (new Date()).toISOString();
+            // Javascripts toISOString and Python's datetime.fromisoformat implement different parts of
+            // the ISO 8601 standard, so we replace Z (indicating Zulu time) with +00:00 to make it compatible with python
+            const currentDateTime = currentDateTimeJSISO.replace('Z', '+00:00');
+
+            resized_at = (resized || resized_at === undefined) ? currentDateTime : resized_at;
+            focused_at = (focused || focused_at === undefined) ? currentDateTime : focused_at;
             this.send({
                 event: 'set_view_data',
                 id: view.cid,
