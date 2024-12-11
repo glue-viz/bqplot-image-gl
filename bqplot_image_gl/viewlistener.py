@@ -2,8 +2,16 @@ import ipywidgets as widgets
 from ipywidgets.widgets import widget_serialization
 from traitlets import Unicode, Dict, Instance
 from bqplot_image_gl._version import __version__
+from typing import TypedDict, cast, Dict as DictType
 
 __all__ = ['ViewListener']
+
+
+class ViewDataEntry(TypedDict):
+    x: float
+    y: float
+    width: float
+    height: float
 
 
 @widgets.register
@@ -17,7 +25,7 @@ class ViewListener(widgets.DOMWidget):
 
     widget = Instance(widgets.Widget).tag(sync=True, **widget_serialization)
     css_selector = Unicode(None, allow_none=True).tag(sync=True)
-    view_data = Dict().tag(sync=True)
+    view_data = Dict(value_trait=cast(DictType[str, ViewDataEntry], {})).tag(sync=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
