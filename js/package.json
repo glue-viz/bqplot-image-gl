@@ -55,7 +55,7 @@
   },
   "jupyterlab": {
     "extension": "lib/labplugin",
-    "outputDir": "../share/jupyter/labextensions/bqplot-image-gl",
+    "outputDir": "../bqplot_image_gl/labextension",
     "sharedPackages": {
       "@jupyter-widgets/base": {
         "bundled": false,
