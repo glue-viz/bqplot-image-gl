@@ -1,6 +1,85 @@
 [build-system]
-requires = ["jupyter_packaging>=0.10.6",
-            "jupyterlab>=3.6",
-            "setuptools>=40.8.0",
-            "wheel"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "jupyterlab>=3.6",
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "bqplot-image-gl"
+dynamic = ["version"]
+description = "An ipywidget image widget for astronomical purposes"
+readme = "README.md"
+authors = [
+    {name = "Maarten A. Breddels", email = "maartenbreddels@gmail.com"},
+]
+requires-python = ">=3.7"
+keywords = ["ipython", "jupyter", "widgets"]
+license = {text = "MIT"}  # Add appropriate license
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: IPython",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Multimedia :: Graphics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+]
+dependencies = [
+    "ipywidgets>=7.0.0",
+    "bqplot>=0.12",
+    "pillow"
+]
+
+[project.urls]
+Homepage = "https://github.com/glue-viz/bqplot-image-gl"
+
+[tool.hatch.version]
+path = "bqplot_image_gl/_version.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".github",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "bqplot_image_gl",
+    "etc",
+    "js",
+]
+
+[tool.hatch.build]
+artifacts = [
+    "bqplot_image_gl/nbextension",
+    "bqplot_image_gl/labextension",
+]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"bqplot_image_gl/nbextension" = "share/jupyter/nbextensions/bqplot-image-gl"
+"bqplot_image_gl/labextension" = "share/jupyter/labextensions/bqplot-image-gl"
+"./bqplot-image-gl.json" = "etc/jupyter/nbconfig/notebook.d/bqplot-image-gl.json"
+
+[tool.hatch.build.hooks.jupyter-builder]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = [
+    "bqplot_image_gl/nbextension/index.js",
+    "bqplot_image_gl/labextension/package.json",
+]
+skip-if-exists = [
+    "bqplot_image_gl/nbextension/index.js",
+    "bqplot_image_gl/labextension/package.json",
+]
+dependencies = [
+    "hatch-jupyter-builder>=0.5.0",
+]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
+path = "./js"
+build_cmd = "build"

@@ -1,9 +1,10 @@
 *.egg-info
 bqplot_image_gl/static
+bqplot_image_gl/labextension
+bqplot_image_gl/nbextension
 dist
 node_modules
 .tox
 .ipynb_checkpoints
 .tmp
 __pycache__
-share
