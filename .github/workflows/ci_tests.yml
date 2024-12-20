@@ -97,6 +97,9 @@ jobs:
         - linux: py313-test
 
         - macos: py37-test
+          runs-on: macos-13
+          # virtualenv (which tox uses) dropped support for making python 3.7 environments in 20.27.0
+          toxdeps: virtualenv==20.26.6 hatchling
         - macos: py310-test
         - macos: py312-test
 
@@ -107,4 +110,6 @@ jobs:
           runs-on: ubuntu-22.04
         - macos: py37-notebooks
           runs-on: macos-13
+          # virtualenv (which tox uses) dropped support for making python 3.7 environments in 20.27.0
+          toxdeps: virtualenv==20.26.6 hatchling
         - windows: py39-notebooks
