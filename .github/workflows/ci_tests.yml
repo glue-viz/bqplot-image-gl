@@ -93,8 +93,6 @@ jobs:
         - linux: codestyle
           coverage: false
 
-        - linux: py36-test
-          runs-on: ubuntu-20.04
         - linux: py38-test
         - linux: py313-test
 
