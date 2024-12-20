@@ -97,6 +97,7 @@ jobs:
         - linux: py313-test
 
         - macos: py37-test
+          runs-on: macos-13
         - macos: py310-test
         - macos: py312-test
 
@@ -105,4 +106,5 @@ jobs:
 
         - linux: py38-notebooks
         - macos: py37-notebooks
+          runs-on: macos-13
         - windows: py39-notebooks
