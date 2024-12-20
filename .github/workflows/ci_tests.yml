@@ -94,7 +94,7 @@ jobs:
           coverage: false
 
         - linux: py37-test
-          runs-on: ubuntu-20.04
+          runs-on: ubuntu-22.04
         - linux: py38-test
         - linux: py313-test
 
@@ -105,7 +105,7 @@ jobs:
         - windows: py311-test
 
         - linux: py37-notebooks
-          runs-on: ubuntu-20.04
+          runs-on: ubuntu-22.04
         - macos: py38-notebooks
           runs-on: macos-13
         - windows: py39-notebooks
