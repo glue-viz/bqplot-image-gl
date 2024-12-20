@@ -65,7 +65,7 @@ jobs:
           echo $PWD
           ls -al .
           ls -al dist/
-          pip install dist/bqplot_image_gl*.whl "pytest-ipywidgets[all]"
+          pip install dist/bqplot_image_gl*.whl "pytest-ipywidgets[all]" "pytest-playwright==0.5.2"
 
       - name: Install playwright
         run: |
