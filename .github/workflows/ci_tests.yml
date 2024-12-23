@@ -8,50 +8,55 @@ on:
     - '*'
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Install node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af  # v4.1.0
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: '3.x'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install twine wheel jupyter-packaging "jupyterlab<4"
+          pip install twine wheel jupyter-packaging jupyterlab
 
       - name: Build
         run: |
           python setup.py sdist bdist_wheel
 
       - name: Upload builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
           path: ./dist
+
   visual-regression-tests:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
           path: ./dist
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: '3.x'
 
@@ -72,14 +77,14 @@ jobs:
 
       - name: Upload UI Test artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
         with:
           name: bqplot-image-gl-ui-test-output
           path: |
             test-results
 
   tests:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@d68193b68216da64eafaa618f53c59f5d271c56e  # v1.14.0
     with:
       coverage: codecov
 
@@ -88,15 +93,19 @@ jobs:
         - linux: codestyle
           coverage: false
 
-        - linux: py36-test
-          runs-on: ubuntu-20.04
+        - linux: py37-test
+          runs-on: ubuntu-22.04
         - linux: py38-test
+        - linux: py313-test
 
-        - macos: py37-test
         - macos: py310-test
+        - macos: py312-test
 
         - windows: py39-test
+        - windows: py311-test
 
-        - linux: py38-notebooks
-        - macos: py37-notebooks
+        - linux: py37-notebooks
+          runs-on: ubuntu-22.04
+        - macos: py38-notebooks
+          runs-on: macos-13
         - windows: py39-notebooks
