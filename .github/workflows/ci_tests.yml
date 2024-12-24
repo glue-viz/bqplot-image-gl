@@ -42,7 +42,7 @@ jobs:
           hatch build
 
       - name: Upload builds
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4.5.0
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
           path: |
@@ -81,14 +81,14 @@ jobs:
 
       - name: Upload UI Test artifacts
         if: always()
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4.5.0
         with:
           name: bqplot-image-gl-ui-test-output
           path: |
             test-results
 
   tests:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@d68193b68216da64eafaa618f53c59f5d271c56e  # v1.14.0
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@9f1f43251dde69da8613ea8e11144f05cdea41d5  # v1.15.0
     with:
       coverage: codecov
 
