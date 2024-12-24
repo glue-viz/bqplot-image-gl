@@ -32,7 +32,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install hatch
+          pip install hatch jupyterlab
+
+      - name: Install JavaScript dependencies
+        run: (cd js && npm ci && npm run build && npm pack)
 
       - name: Build
         run: |
@@ -42,7 +45,9 @@ jobs:
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
-          path: ./dist
+          path: |
+            ./dist
+            ./js/*.tgz
 
   visual-regression-tests:
     runs-on: ubuntu-latest
@@ -53,7 +58,6 @@ jobs:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
-          path: ./dist
 
       - name: Install Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
@@ -113,3 +117,45 @@ jobs:
           # virtualenv (which tox uses) dropped support for making python 3.7 environments in 20.27.0
           toxdeps: virtualenv==20.26.6 hatchling
         - windows: py39-notebooks
+
+  release:
+    needs: [tests, visual-regression-tests]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: bqplot-image-gl-dist-${{ github.run_number }}
+
+      - name: Install node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af  # v4.1.0
+        with:
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install twine wheel jupyter-packaging jupyterlab
+
+      - name: Publish the Python package
+        if: startsWith(github.event.ref, 'refs/tags/v')
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload --skip-existing dist/*.whl dist/*.tar.gz
+
+      - name: Publish the NPM package
+        if: startsWith(github.event.ref, 'refs/tags/v')
+        run: |
+          echo $PRE_RELEASE
+          if [[ $PRE_RELEASE == "true" ]]; then export TAG="next"; else export TAG="latest"; fi
+          cd js
+          npm publish --tag ${TAG} --access public *.tgz
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PRE_RELEASE: ${{ github.event.release.prerelease }}
