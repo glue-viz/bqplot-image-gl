@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -33,13 +33,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
