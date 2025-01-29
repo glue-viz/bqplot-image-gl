@@ -33,6 +33,7 @@ classifiers = [
 ]
 dependencies = [
     "ipywidgets>=7.0.0",
+    "typing-extensions",
     "bqplot>=0.12",
     "pillow"
 ]
