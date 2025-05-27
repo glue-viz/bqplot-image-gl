@@ -6,6 +6,8 @@ export * from "./linesgl.js";
 export * from "./contour.js";
 export * from './BrushEllipseSelectorModel';
 export * from './BrushEllipseSelector';
+export * from './BrushRectangleSelectorModel';
+export * from './BrushRectangleSelector';
 export * from './MouseInteraction'
 export * from './ViewListener'
 export * from './version.js'
