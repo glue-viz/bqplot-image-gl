@@ -71,7 +71,7 @@ class BrushEllipseSelector extends BaseXYSelector {
             this._brushEnd({ x: e.x, y: e.y });
         }));
         // events for moving the existing ellipse
-        this.d3ellipse.call(d3_drag_1.drag().on("start", () => {
+        this.brush.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
             this._moveStart({ x: e.x, y: e.y });
         }).on("drag", () => {
@@ -94,8 +94,8 @@ class BrushEllipseSelector extends BaseXYSelector {
         }));
         this.updateEllipse();
         this.syncSelectionToMarks();
-        this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style', () => this.updateEllipse());
-        this.listenTo(this.model, 'change:selected_x change:selected_y', this.syncSelectionToMarks);
+        this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style change:rotate', () => this.updateEllipse());
+        this.listenTo(this.model, 'change:selected_x change:selected_y change:rotate', this.syncSelectionToMarks);
     }
     update_xscale_domain() {
         super.update_xscale_domain();
@@ -339,6 +339,7 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("ry", ry + extraRy)
                 .style('stroke', this.model.get('color') || 'black')
             applyStyles(this.d3ellipseHandle, this.model.get('border_style'));
+            this.brush.attr("transform", `rotate(${this.model.get('rotate')}, ${cx + offsetX}, ${cy + offsetY})`);
             this.brush.node().style.display = '';
         }
     }
@@ -346,10 +347,15 @@ class BrushEllipseSelector extends BaseXYSelector {
         if (!this.canDraw())
             return;
         const { cx, cy, rx, ry } = this.calculatePixelCoordinates();
+        const angle = -this.model.get('rotate') * Math.PI / 180; // Convert to radians and negate for inverse transform
         const point_selector = function (p) {
             const [pointX, pointY] = p;
-            const dx = (cx - pointX) / rx;
-            const dy = (cy - pointY) / ry;
+
+            // Translate point to origin, rotate, then translate back
+            const rotatedX = (pointX - cx) * Math.cos(angle) - (pointY - cy) * Math.sin(angle) + cx;
+            const rotatedY = (pointX - cx) * Math.sin(angle) + (pointY - cy) * Math.cos(angle) + cy;
+            const dx = (cx - rotatedX) / rx;
+            const dy = (cy - rotatedY) / ry;
             const insideCircle = (dx * dx + dy * dy) <= 1;
             return insideCircle;
         };

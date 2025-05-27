@@ -45,6 +45,8 @@ class BrushEllipseSelector(BrushSelector):
         This attribute can be used to trigger computationally intensive code
         which should be run only on the interval selection being completed as
         opposed to code which should be run whenever selected is changing.
+    rotate: float (default: 0)
+        The rotation angle of the ellipse in degrees.
     """
     _view_module = Unicode('bqplot-image-gl').tag(sync=True)
     _model_module = Unicode('bqplot-image-gl').tag(sync=True)
@@ -56,6 +58,7 @@ class BrushEllipseSelector(BrushSelector):
                          "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
     _view_name = Unicode('BrushEllipseSelector').tag(sync=True)
     _model_name = Unicode('BrushEllipseSelectorModel').tag(sync=True)
+    rotate = Float(0).tag(sync=True)
 
 
 class MouseInteraction(Interaction):
