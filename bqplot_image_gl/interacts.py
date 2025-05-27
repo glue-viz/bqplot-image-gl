@@ -61,6 +61,55 @@ class BrushEllipseSelector(BrushSelector):
     rotate = Float(0).tag(sync=True)
 
 
+class BrushRectangleSelector(BrushSelector):
+
+    """BrushRectangle interval selector interaction.
+
+    This 2-D selector interaction enables the user to select a rectangular
+    region using the brushing action of the mouse. Unlike bqplot's
+    BrushSelector, this selector is rotatable. A mouse-down marks the
+    starting corner of the rectangle. The drag after the mouse down selects
+    the opposite corner of the rectangle.
+
+    Once a rectangle is drawn, it can be moved by dragging, or reshaped by
+    dragging the sides.
+
+    The selected_x and selected_y arrays define the bounds of the rectangle.
+
+    Attributes
+    ----------
+    selected_x: numpy.ndarray
+        Two element array containing the start and end of the interval selected
+        in terms of the x_scale of the selector.
+        This attribute changes while the selection is being made with the
+        ``BrushSelector``.
+    selected_y: numpy.ndarray
+        Two element array containing the start and end of the interval selected
+        in terms of the y_scale of the selector.
+        This attribute changes while the selection is being made with the
+        ``BrushRectangleSelector``.
+    brushing: bool (default: False)
+        boolean attribute to indicate if the selector is being dragged.
+        It is True when the selector is being moved and False when it is not.
+        This attribute can be used to trigger computationally intensive code
+        which should be run only on the interval selection being completed as
+        opposed to code which should be run whenever selected is changing.
+    rotate: float (default: 0)
+        The rotation angle of the rectangle in degrees.
+    """
+
+    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
+    _view_module_version = Unicode('^' + __version__).tag(sync=True)
+    _model_module_version = Unicode('^' + __version__).tag(sync=True)
+    style = Dict({"opacity": 0.3, "cursor": "grab"}).tag(sync=True)
+    border_style = Dict({"fill": "none", "stroke-width": "3px",
+                         "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
+    _view_name = Unicode('BrushRectangleSelector').tag(sync=True)
+    _model_name = Unicode('BrushRectangleSelectorModel').tag(sync=True)
+    rotate = Float(0).tag(sync=True)
+
+
 class MouseInteraction(Interaction):
     """Mouse events listener.
 
