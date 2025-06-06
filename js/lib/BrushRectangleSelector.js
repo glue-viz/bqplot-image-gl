@@ -13,21 +13,8 @@ const d3_drag_1 = require("d3-drag");
 const d3Selection = require("d3-selection");
 const { applyStyles } = require("./utils");
 const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
-/*
-    good resource: https://en.wikipedia.org/wiki/Ellipse
-    Throughout we use rx==a and ry==b, assuming like the article above:
-    x**2/a**2 + y**2/b**2==1
 
-    Useful equations:
-        y = +/- b/a * sqrt(a**2 -x**2)
-        a = sqrt(y**2 a**2/b**2 + x**2)
-        x = a cos(t)
-        y = b sin(t) (where t is called the eccentric anomaly or just 'angle)
-        y/x = b/a sin(t)/cos(t) = b/a tan(t)
-        a y/ b x = a/b cos(t)/sin(t) = tan(t)
-        t = atan2(a y, b x)
-*/
-class BrushEllipseSelector extends BaseXYSelector {
+class BrushRectangleSelector extends BaseXYSelector {
     constructor() {
         super(...arguments);
         // for testing purposes we need to keep track of this at the instance level
@@ -55,11 +42,13 @@ class BrushEllipseSelector extends BaseXYSelector {
             .style("visibility", "hidden")
         ;
         d3el.attr("class", "selector brushintsel")
+        this.point1 = d3el.append("circle")
+        this.point2 = d3el.append("circle")
         this.brush = d3el.append('g')
             .style("visibility", "visible");
 
-        this.d3ellipseHandle =  this.brush.append("ellipse");
-        this.d3ellipse =    this.brush.append("ellipse");
+        this.d3rectangleHandle =  this.brush.append("rect");
+        this.d3rectangle =    this.brush.append("rect");
         this.eventElement.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
             this._brushStart({ x: e.x, y: e.y });
@@ -70,7 +59,7 @@ class BrushEllipseSelector extends BaseXYSelector {
             const e = d3GetEvent();
             this._brushEnd({ x: e.x, y: e.y });
         }));
-        // events for moving the existing ellipse
+        // events for moving the existing rectangle
         this.brush.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
             this._moveStart({ x: e.x, y: e.y });
@@ -81,8 +70,8 @@ class BrushEllipseSelector extends BaseXYSelector {
             const e = d3GetEvent();
             this._moveEnd({ x: e.x, y: e.y });
         }));
-        // events for reshaping the existing ellipse
-        this.d3ellipseHandle.call(d3_drag_1.drag().on("start", () => {
+        // events for reshaping the existing rectangle
+        this.d3rectangleHandle.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
             this._reshapeStart({ x: e.x, y: e.y });
         }).on("drag", () => {
@@ -92,20 +81,20 @@ class BrushEllipseSelector extends BaseXYSelector {
             const e = d3GetEvent();
             this._reshapeEnd({ x: e.x, y: e.y });
         }));
-        this.updateEllipse();
+        this.updateRectangle();
         this.syncSelectionToMarks();
-        this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style change:rotate', () => this.updateEllipse());
+        this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style change:rotate', () => this.updateRectangle());
         this.listenTo(this.model, 'change:selected_x change:selected_y change:rotate', this.syncSelectionToMarks);
     }
     update_xscale_domain() {
         super.update_xscale_domain();
-        if(this.x_scale && this.y_scale && this.d3ellipse)
-            this.updateEllipse();
+        if(this.x_scale && this.y_scale && this.d3rectangle)
+            this.updateRectangle();
     }
     update_yscale_domain() {
         super.update_yscale_domain();
-        if(this.x_scale && this.y_scale && this.d3ellipse)
-            this.updateEllipse();
+        if(this.x_scale && this.y_scale && this.d3rectangle)
+            this.updateRectangle();
     }
     relayout() {
         super.relayout();
@@ -119,7 +108,7 @@ class BrushEllipseSelector extends BaseXYSelector {
             .attr("height", this.parent.height -
                             this.parent.margin.top -
                             this.parent.margin.bottom);
-        this.updateEllipse()
+        this.updateRectangle()
     }
     remove() {
         super.remove()
@@ -135,7 +124,6 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.touch();
     }
     _brushDrag({ x, y }) {
-        console.log('drag', x, y);
         this._brush({ x, y });
     }
     _brushEnd({ x, y }) {
@@ -147,37 +135,21 @@ class BrushEllipseSelector extends BaseXYSelector {
     _brush({ x, y }) {
         const cx = this.brushStartPosition.x;
         const cy = this.brushStartPosition.y;
-        const relX = Math.abs(x - cx);
-        const relY = Math.abs(y - cy);
-        if (!this.model.get('pixel_aspect') && ((relX == 0) || (relY == 0))) {
-            console.log('cannot draw ellipse');
-            this.model.set('selected_x', null);
-            this.model.set('selected_y', null);
-            this.touch();
-            return; // we can't draw an ellipse or circle
-        }
-        // if 'feels' natural to have a/b == relX/relY, meaning the aspect ratio of the ellipse equals that of the pixels moved
-        // but the aspect can be overridden by the model, to draw for instance circles
-        let ratio = this.model.get('pixel_aspect') || (relX / relY);
-        // using ra = a = sqrt(y**2 a**2/b**2 + x**2) we can solve a, from x, y, and the ratio a/b
-        const rx = Math.sqrt(relY * relY * ratio * ratio + relX * relX);
-        // and from that solve ry == b
-        const ry = rx / ratio;
-        // bounding box of the ellipse in pixel coordinates:
-        const [px1, px2, py1, py2] = [cx - rx, cx + rx, cy - ry, cy + ry];
-        // we don't want a single click to trigger an empty selection
-        if (!((px1 == px2) && (py1 == py2))) {
-            let selectedX = [px1, px2].map((pixel) => this.x_scale.scale.invert(pixel));
-            let selectedY = [py1, py2].map((pixel) => this.y_scale.scale.invert(pixel));
-            this.model.set('selected_x', new Float32Array(selectedX));
-            this.model.set('selected_y', new Float32Array(selectedY));
-            this.touch();
-        }
-        else {
+        
+        if (cx == x && cy == y) {
             this.model.set('selected_x', null);
             this.model.set('selected_y', null);
             this.touch();
         }
+        this.model.set(
+            'selected_x',
+            new Float32Array(
+                [cx, x].map((pixel) => this.x_scale.scale.invert(pixel))));
+        this.model.set(
+            'selected_y',
+            new Float32Array(
+                [cy, y].map((pixel) => this.y_scale.scale.invert(pixel))));
+        this.touch();
     }
     _moveStart({ x, y }) {
         this.moveStartPosition = { x, y };
@@ -204,52 +176,34 @@ class BrushEllipseSelector extends BaseXYSelector {
     }
     _reshapeStart({ x, y }) {
         const { cx, cy, rx, ry } = this.calculatePixelCoordinates();
-        const ratio = this.model.get('pixel_aspect');
-        if (ratio) {
-            // reshaping with an aspect ratio is done equivalent to starting a new brush on the current ellipse coordinate
-            this._brushStart({ x: cx, y: cy });
-            this._brushDrag({ x, y });
-        }
-        else {
-            const relX = x - cx;
-            const relY = y - cy;
-            // otherwise, we deform the ellipse by 'dragging' the ellipse at the angle we grab it
-            this.reshapeStartAngle = Math.atan2(rx * relY, ry * relX);
-            this.reshapeStartRadii = { rx, ry };
-        }
+
+        const relX = x - cx;
+        const relY = y - cy;
+        // otherwise, we deform the rectangle by 'dragging' the rectangle at the angle we grab it
+        this.reshapeStartAngle = Math.atan2(rx * relY, ry * relX);
+        this.reshapeStartRadii = { rx, ry };
+
         this.model.set("brushing", true);
         this.touch();
     }
     _reshapeDrag({ x, y }) {
-        const ratio = this.model.get('pixel_aspect');
-        if (ratio) {
-            this._brushDrag({ x, y });
-        }
-        else {
-            this._reshape({ x: x, y: y, angle: this.reshapeStartAngle });
-        }
+        this._reshape({ x: x, y: y, angle: this.reshapeStartAngle });
     }
     _reshapeEnd({ x, y }) {
-        const ratio = this.model.get('pixel_aspect');
-        if (ratio) {
-            this._brushEnd({ x, y });
-        }
-        else {
-            this._reshape({ x: x, y: y, angle: this.reshapeStartAngle });
-        }
+        this._reshape({ x: x, y: y, angle: this.reshapeStartAngle });
         this.model.set("brushing", false);
         this.touch();
     }
     _reshape({ x, y, angle }) {
         const { cx, cy } = this.calculatePixelCoordinates();
-        // if we are within -10,+10 degrees within 0, 90, 180, 270, or 360 degrees
+        // if we are within -45,+45 degrees within 0, 90, 180, 270, or 360 degrees
         // 'round' to that angle
         angle = (angle + Math.PI * 2) % (Math.PI * 2);
         for (let i = 0; i < 5; i++) {
             const angleTest = Math.PI * i / 2;
-            const angle1 = angleTest - 10 * Math.PI / 180;
-            const angle2 = angleTest + 10 * Math.PI / 180;
-            console.log('test angle', angleTest, angle1, angle2, ((angle > angle1) && (angle < angle2)));
+            const angle1 = angleTest - 45 * Math.PI / 180;
+            const angle2 = angleTest + 45 * Math.PI / 180;
+
             if ((angle > angle1) && (angle < angle2)) {
                 angle = angleTest;
             }
@@ -262,27 +216,16 @@ class BrushEllipseSelector extends BaseXYSelector {
            relX = rx cos(t)
            relY = ry sin(t) (where t is called the eccentric anomaly or just 'angle)
         */
-        let ratio = this.model.get('pixel_aspect');
         let rx = relX / (Math.cos(angle));
         let ry = relY / (Math.sin(angle));
-        // if we are at one of the 4 corners, we fix rx, ry, or scaled by the ratio
+        // if we are at one of the 4 corners, we fix rx, ry
         if ((angle == Math.PI / 2) || (angle == Math.PI * 3 / 2)) {
-            if (ratio) {
-                rx = ry / ratio;
-            }
-            else {
-                rx = this.reshapeStartRadii.rx;
-            }
+            rx = this.reshapeStartRadii.rx;
         }
         if ((angle == 0) || (angle == Math.PI)) {
-            if (ratio) {
-                ry = rx * ratio;
-            }
-            else {
-                ry = this.reshapeStartRadii.ry;
-            }
+            ry = this.reshapeStartRadii.ry;
         }
-        // // bounding box of the ellipse in pixel coordinates:
+        // // bounding box of the rectangle in pixel coordinates:
         const [px1, px2, py1, py2] = [cx - rx, cx + rx, cy - ry, cy + ry];
         let selectedX = [px1, px2].map((pixel) => this.x_scale.scale.invert(pixel));
         let selectedY = [py1, py2].map((pixel) => this.y_scale.scale.invert(pixel));
@@ -319,26 +262,27 @@ class BrushEllipseSelector extends BaseXYSelector {
         // bounding box, and svg coordinates
         return { px1, px2, py1, py2, cx: (px1 + px2) / 2, cy: (py1 + py2) / 2, rx: Math.abs(px2 - px1) / 2, ry: Math.abs(py2 - py1) / 2 };
     }
-    updateEllipse(offsetX = 0, offsetY = 0, extraRx = 0, extraRy = 0) {
+    updateRectangle(offsetX = 0, offsetY = 0, extraRx = 0, extraRy = 0) {
         if (!this.canDraw()) {
             this.brush.node().style.display = 'none';
         }
         else {
-            const { cx, cy, rx, ry } = this.calculatePixelCoordinates();
-            this.d3ellipse
-                .attr("cx", cx + offsetX)
-                .attr("cy", cy + offsetY)
-                .attr("rx", rx + extraRx)
-                .attr("ry", ry + extraRy)
+            const { px1, px2, py1, py2, cx, cy } = this.calculatePixelCoordinates();
+            const [ x, y, width, height ] = [ px1 + offsetX, py2 + offsetY, px2 - px1, py1 - py2 ];
+            this.d3rectangle
+                .attr("x", x)
+                .attr("y", y)
+                .attr("width", width)
+                .attr("height", height)
                 .style('fill', this.model.get('color') || 'grey');
-            applyStyles(this.d3ellipse, this.model.get('style'));
-            this.d3ellipseHandle
-                .attr("cx", cx + offsetX)
-                .attr("cy", cy + offsetY)
-                .attr("rx", rx + extraRx)
-                .attr("ry", ry + extraRy)
+            applyStyles(this.d3rectangle, this.model.get('style'));
+            this.d3rectangleHandle
+                .attr("x", x)
+                .attr("y", y)
+                .attr("width", width)
+                .attr("height", height)
                 .style('stroke', this.model.get('color') || 'black')
-            applyStyles(this.d3ellipseHandle, this.model.get('border_style'));
+            applyStyles(this.d3rectangleHandle, this.model.get('border_style'));
             this.brush.attr("transform", `rotate(${this.model.get('rotate')}, ${cx + offsetX}, ${cy + offsetY})`);
             this.brush.node().style.display = '';
         }
@@ -346,18 +290,22 @@ class BrushEllipseSelector extends BaseXYSelector {
     syncSelectionToMarks() {
         if (!this.canDraw())
             return;
-        const { cx, cy, rx, ry } = this.calculatePixelCoordinates();
-        const angle = -this.model.get('rotate') * Math.PI / 180; // Convert to radians and negate for inverse transform
+        const { px1, px2, py1, py2, cx, cy } = this.calculatePixelCoordinates();
+
+        const angle = -this.model.get('rotate') * Math.PI / 180;
         const point_selector = function (p) {
             const [pointX, pointY] = p;
 
             // Translate point to origin, rotate, then translate back
             const rotatedX = (pointX - cx) * Math.cos(angle) - (pointY - cy) * Math.sin(angle) + cx;
             const rotatedY = (pointX - cx) * Math.sin(angle) + (pointY - cy) * Math.cos(angle) + cy;
-            const dx = (cx - rotatedX) / rx;
-            const dy = (cy - rotatedY) / ry;
-            const insideCircle = (dx * dx + dy * dy) <= 1;
-            return insideCircle;
+            
+            // const {x: rotatedX, y: rotatedY} = this.rotatePoint(pointX, pointY, cx, cy, angle);
+            
+            // After rotation, we can do a simple bounds check
+            const insideRectangle = rotatedX >= px1 && rotatedX <= px2 && 
+                                  rotatedY >= py2 && rotatedY <= py1;
+            return insideRectangle;
         };
         const rect_selector = function (xy) {
             // TODO: Leaving this to someone who has a clear idea on how this should be implemented
@@ -370,4 +318,4 @@ class BrushEllipseSelector extends BaseXYSelector {
         });
     }
 }
-exports.BrushEllipseSelector = BrushEllipseSelector;
+exports.BrushRectangleSelector = BrushRectangleSelector;
