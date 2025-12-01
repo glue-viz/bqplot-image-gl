@@ -1,6 +1,6 @@
 from bqplot.interacts import BrushSelector, Interaction
 from bqplot.scales import Scale
-from traitlets import Float, Unicode, Dict, Instance, Int, List
+from traitlets import Float, Unicode, Dict, Instance, Int, List, Bool
 from ipywidgets.widgets.widget import widget_serialization
 from bqplot_image_gl._version import __version__
 
@@ -59,6 +59,7 @@ class BrushEllipseSelector(BrushSelector):
     _view_name = Unicode('BrushEllipseSelector').tag(sync=True)
     _model_name = Unicode('BrushEllipseSelectorModel').tag(sync=True)
     rotate = Float(0).tag(sync=True)
+    show_handles = Bool(False).tag(sync=True)
 
 
 class BrushRectangleSelector(BrushSelector):
@@ -108,6 +109,7 @@ class BrushRectangleSelector(BrushSelector):
     _view_name = Unicode('BrushRectangleSelector').tag(sync=True)
     _model_name = Unicode('BrushRectangleSelectorModel').tag(sync=True)
     rotate = Float(0).tag(sync=True)
+    show_handles = Bool(False).tag(sync=True)
 
 
 class MouseInteraction(Interaction):

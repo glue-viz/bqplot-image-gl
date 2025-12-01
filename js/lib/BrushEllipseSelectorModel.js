@@ -15,6 +15,7 @@ class BrushEllipseSelectorModel extends BrushSelectorModel {
             _view_name: "BrushEllipseSelector",
             pixel_aspect: null,
             rotate: 0,
+            show_handles: false,
             style: {
                 fill: "green",
                 opacity: 0.3,
