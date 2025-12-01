@@ -15,6 +15,7 @@ class BrushRectangleSelectorModel extends BrushSelectorModel {
             _model_name: "BrushRectangleSelectorModel",
             _view_name: "BrushRectangleSelector",
             rotate: 0,
+            show_handles: false,
             style: {
                 fill: "green",
                 opacity: 0.3,

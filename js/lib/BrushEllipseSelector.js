@@ -35,6 +35,7 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.moveStartPosition = { x: 0, y: 0 };
         this.reshapeStartAngle = 0;
         this.reshapeStartRadii = { rx: 0, ry: 0 };
+        this.initialDrag = false;
     }
     async render() {
         super.render();
@@ -62,6 +63,9 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.d3ellipse =    this.brush.append("ellipse");
         this.eventElement.call(d3_drag_1.drag().on("start", () => {
             const e = d3GetEvent();
+            if (this.model.get('selected_x') == null || this.model.get('selected_y', null)) {
+                this.initialDrag = true;
+            }
             this._brushStart({ x: e.x, y: e.y });
         }).on("drag", () => {
             const e = d3GetEvent();
@@ -69,6 +73,8 @@ class BrushEllipseSelector extends BaseXYSelector {
         }).on("end", () => {
             const e = d3GetEvent();
             this._brushEnd({ x: e.x, y: e.y });
+            this.initialDrag = false;
+            this.updateBoundingHandles();
         }));
         // events for moving the existing ellipse
         this.brush.call(d3_drag_1.drag().on("start", () => {
@@ -96,6 +102,89 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.syncSelectionToMarks();
         this.listenTo(this.model, 'change:selected_x change:selected_y change:color change:style change:border_style change:rotate', () => this.updateEllipse());
         this.listenTo(this.model, 'change:selected_x change:selected_y change:rotate', this.syncSelectionToMarks);
+    }
+    updateBoundingHandles() {
+        const handleSize = 8;
+        const color = this.model.get("color") || this.model.get("border_style").fill || "black";
+        if (!this.boundingRect && this.model.get("show_handles") && !this.initialDrag) {
+            this.handleConfigs = [
+                { name: "top", offsetX: 0, offsetY: -1, cursor: "ns-resize" },
+                { name: "right", offsetX: 1, offsetY: 0, cursor: "ew-resize" },
+                { name: "bottom", offsetX: 0, offsetY: 1, cursor: "ns-resize" },
+                { name: "left", offsetX: -1, offsetY: 0, cursor: "ew-resize" },
+                { name: "top-left", offsetX: -1, offsetY: -1, cursor: "nwse-resize", type: "corner" },
+                { name: "top-right", offsetX: 1, offsetY: -1, cursor: "nesw-resize", type: "corner" },
+                { name: "bottom-right", offsetX: 1, offsetY: 1, cursor: "nwse-resize", type: "corner" },
+                { name: "bottom-left", offsetX: -1, offsetY: 1, cursor: "nesw-resize", type: "corner" }
+            ];
+            this.boundingRect = this.brush.append("rect")
+                .style("fill", "none")
+                .style("pointer-events", "none")
+                .style("stroke", color);
+            const handleDrag = d3_drag_1.drag()
+                .on("start", (dhandle) => {
+                    const e = d3GetEvent();
+                    if (dhandle.type === "corner") {
+                        this.model.set("brushing", true);
+                    } else {
+                        this._reshapeStart({x: e.x, y: e.y});
+                    }
+                }).on("drag", (handled) => {
+                    const e = d3GetEvent();
+                    if (handled.type === "corner") {
+                        this._reshapeDragCornerHandle(e)
+                    } else {
+                        this._reshapeDrag({x: e.x, y: e.y});
+                    }
+                }).on("end", (handle) => {
+                    const e = d3GetEvent();
+                    if (handle.type === "corner") {
+                        this.model.set("brushing", false);
+                        this.touch();
+                    } else {
+                        this._reshapeEnd({x: e.x, y: e.y});
+                    }
+                });
+            this.handleGroup = this.brush.append("g");
+            this.handleSelection = this.handleGroup.selectAll("rect")
+                .data(this.handleConfigs, (handle) => handle.name)
+                .enter()
+                .append("rect")
+                .attr("width", handleSize)
+                .attr("height", handleSize)
+                .style("fill", "#fff")
+                .style("stroke", "black")
+                .style("pointer-events", "all")
+                .style("cursor", (handle) => handle.cursor)
+                .call(handleDrag);
+        }
+        if (this.boundingRect) {
+            const { px1, px2, py1, py2 } = this.calculatePixelCoordinates();
+            let width = px2 - px1;
+            let height = py1 - py2;
+            this.boundingRect
+                .attr("x", px1)
+                .attr("y", py2)
+                .attr("width", width)
+                .attr("height", height)
+                .style("stroke", color);
+            const handlePositions = this.handleConfigs.map((handle) => ({
+                ...handle,
+                x: px1 + (handle.offsetX + 1) * width / 2,
+                y: py2 + (handle.offsetY + 1) * height / 2,
+            }));
+            this.handleSelection = this.handleSelection
+                .data(handlePositions, (d) => d.name)
+                .attr("x", (handle) => handle.x - handleSize / 2)
+                .attr("y", (handle) => handle.y - handleSize / 2)
+            if (this.initialDrag) {
+                this.handleGroup.attr("display", "none");
+                this.boundingRect.attr("display", "none");
+            } else {
+                this.handleGroup.attr("display", "");
+                this.boundingRect.attr("display", "");
+            }
+        }
     }
     update_xscale_domain() {
         super.update_xscale_domain();
@@ -220,6 +309,20 @@ class BrushEllipseSelector extends BaseXYSelector {
         this.model.set("brushing", true);
         this.touch();
     }
+    _reshapeDragCornerHandle({ x, y }) {
+        const { cx, cy } = this.calculatePixelCoordinates();
+        let halfWidth = Math.abs(cx-x);
+        let halfHeight = Math.abs(cy-y);
+        const ratio = this.model.get('pixel_aspect');
+        if (ratio) {
+            halfWidth = halfHeight = Math.max(halfWidth, halfHeight);
+        }
+        let selectedX = [cx - halfWidth, cx + halfWidth].map((pixel) => this.x_scale.scale.invert(pixel));
+        let selectedY = [cy - halfHeight, cy + halfHeight].map((pixel) => this.y_scale.scale.invert(pixel));
+        this.model.set('selected_x', new Float32Array(selectedX));
+        this.model.set('selected_y', new Float32Array(selectedY));
+        this.touch();
+    }
     _reshapeDrag({ x, y }) {
         const ratio = this.model.get('pixel_aspect');
         if (ratio) {
@@ -339,6 +442,7 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("ry", ry + extraRy)
                 .style('stroke', this.model.get('color') || 'black')
             applyStyles(this.d3ellipseHandle, this.model.get('border_style'));
+            this.updateBoundingHandles();    
             this.brush.attr("transform", `rotate(${this.model.get('rotate')}, ${cx + offsetX}, ${cy + offsetY})`);
             this.brush.node().style.display = '';
         }
