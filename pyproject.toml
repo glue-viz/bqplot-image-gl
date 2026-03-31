@@ -88,5 +88,10 @@ dependencies = [
 path = "./js"
 build_cmd = "build"
 
+[tool.pytest.ini_options]
+markers = [
+    "mpl_image_compare",
+]
+
 [tool.ruff.lint.per-file-ignores]
 "ui-tests/jupyter_server_config.py" = ["F821"]
