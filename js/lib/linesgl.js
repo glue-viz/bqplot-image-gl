@@ -106,7 +106,7 @@ class LinesGLView extends bqplot.Lines {
         };
         this.listenTo(this.model, "change:visible", sync_visible , this);
     }
-    
+
     _updateGeometry() {
         const scalar_names = ["x", "y", "z"];
         const vector4_names = [];

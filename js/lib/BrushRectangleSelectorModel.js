@@ -20,7 +20,7 @@ class BrushRectangleSelectorModel extends BrushSelectorModel {
                 fill: "green",
                 opacity: 0.3,
                 cursor: "grab",
-            }, 
+            },
             border_style: {
                 fill: "none",
                 stroke: "green",
@@ -33,4 +33,4 @@ class BrushRectangleSelectorModel extends BrushSelectorModel {
 }
 
 BrushRectangleSelectorModel.serializers = Object.assign({}, BrushSelectorModel.serializers);
-exports.BrushRectangleSelectorModel = BrushRectangleSelectorModel; 
+exports.BrushRectangleSelectorModel = BrushRectangleSelectorModel;

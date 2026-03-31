@@ -274,7 +274,7 @@ class ImageGLView extends bqplot.Mark {
     }
 
     update_colormap() {
-		
+
         var parse_color_string = function(string){
             const hex_pattern = /.([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/;
             const tuple_pattern = /rgb\((\d+), (\d+), (\d+)\)/;
@@ -291,7 +291,7 @@ class ImageGLView extends bqplot.Mark {
                         parseInt(tuple_match[3])];
 	        }
         }
-		
+
         // convert the d3 color scale to a texture
         var colors = this.scales.image.model.color_range;
         var color_scale = d3.scaleLinear()

@@ -226,7 +226,7 @@ class BrushRectangleSelector extends BaseXYSelector {
     _brush({ x, y }) {
         const cx = this.brushStartPosition.x;
         const cy = this.brushStartPosition.y;
-        
+
         if (cx == x && cy == y) {
             this.model.set('selected_x', null);
             this.model.set('selected_y', null);
@@ -405,11 +405,11 @@ class BrushRectangleSelector extends BaseXYSelector {
             // Translate point to origin, rotate, then translate back
             const rotatedX = (pointX - cx) * Math.cos(angle) - (pointY - cy) * Math.sin(angle) + cx;
             const rotatedY = (pointX - cx) * Math.sin(angle) + (pointY - cy) * Math.cos(angle) + cy;
-            
+
             // const {x: rotatedX, y: rotatedY} = this.rotatePoint(pointX, pointY, cx, cy, angle);
-            
+
             // After rotation, we can do a simple bounds check
-            const insideRectangle = rotatedX >= px1 && rotatedX <= px2 && 
+            const insideRectangle = rotatedX >= px1 && rotatedX <= px2 &&
                                   rotatedY >= py2 && rotatedY <= py1;
             return insideRectangle;
         };

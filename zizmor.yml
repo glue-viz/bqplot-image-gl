@@ -1,0 +1,7 @@
+rules:
+  cache-poisoning:
+    ignore:
+      - ci_tests.yml
+  use-trusted-publishing:
+    ignore:
+      - ci_tests.yml
