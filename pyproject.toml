@@ -34,6 +34,12 @@ dependencies = [
     "pillow",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
 [project.urls]
 Homepage = "https://github.com/glue-viz/bqplot-image-gl"
 
