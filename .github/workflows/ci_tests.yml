@@ -96,6 +96,10 @@ jobs:
           pip install tox
 
       - name: Run visual regression tests
+        run: tox -e py313-visual
+
+      - name: Update snapshots for download
+        if: always()
         run: tox -e py313-visual -- --solara-update-snapshots
 
       - name: Upload reference snapshots
