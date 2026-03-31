@@ -11,7 +11,7 @@ permissions:
 jobs:
   update-visual-references:
     name: Update Visual References
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'update references') }}
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'update baseline') }}
     runs-on: ubuntu-latest
 
     steps:
