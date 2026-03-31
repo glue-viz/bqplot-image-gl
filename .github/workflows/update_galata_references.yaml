@@ -1,4 +1,4 @@
-name: Update Galata References
+name: Update Visual References
 
 on:
   issue_comment:
@@ -8,14 +8,10 @@ permissions:
   contents: write
   pull-requests: write
 
-defaults:
-  run:
-    shell: bash -l {0}
-
 jobs:
-  update-galata-references:
-    name: Update Galata References
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'update galata') }}
+  update-visual-references:
+    name: Update Visual References
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'update references') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -33,49 +29,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Install Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
-      - name: Install
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install twine wheel jupyter-packaging jupyterlab .
+          pip install tox
 
-      - name: Install Galata
-        run: |
-          yarn install
-          yarn playwright install chromium
-        working-directory: ui-tests
-
-      - name: Launch JupyterLab
-        run: yarn run start:detached
-        working-directory: ui-tests
-
-      - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@a7d13170ec542bdca4ef8ac4b15e9c6aa00a6866  # v1.2.1
-        with:
-          resource: http-get://localhost:8988/api
-          timeout: 20000
-
-      - name: Generate updated Galata References
-        env:
-          TARGET_URL: http://127.0.0.1:8988
-        run: yarn run test:update
-        working-directory: ui-tests
+      - name: Update visual snapshots
+        run: tox -e py313-visual -- --solara-update-snapshots
 
       - name: Compress screenshots
         run: |
           sudo apt install optipng
-          optipng *.png
-        working-directory: ui-tests/tests/bqplot-image-gl.test.ts-snapshots
+          find tests/ui/snapshots -name '*.png' -exec optipng {} +
 
       - name: Commit reference images
         run: |
@@ -84,9 +54,9 @@ jobs:
 
           git pull
 
-          git add ui-tests/tests/bqplot-image-gl.test.ts-snapshots
+          git add tests/ui/snapshots
 
-          git commit -m "chore: Update Galata References"
+          git commit -m "chore: Update visual references"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
