@@ -47,7 +47,8 @@ void main(void) {
         color = texture2D(colormap, vec2(value, 0.5));
 #else
     vec4 color = texture2D(image, tex_uv);
-    float opacity_image = 1.0;
+    float opacity_image = color.a;
+    color.a = 1.0;
 #endif
     // since we're working with pre multiplied colors (regarding blending)
     // we also need to multiply rgb by opacity
