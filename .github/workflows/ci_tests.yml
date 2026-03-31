@@ -8,6 +8,9 @@ on:
     - '*'
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install node
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af  # v4.1.0
@@ -32,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install hatch==1.15.1 jupyterlab
+          pip install hatch jupyterlab
 
       - name: Install JavaScript dependencies
         run: (cd js && npm ci && npm run build && npm pack)
@@ -49,46 +54,8 @@ jobs:
             ./dist
             ./js/*.tgz
 
-  visual-regression-tests:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
-        with:
-          name: bqplot-image-gl-dist-${{ github.run_number }}
-
-      - name: Install Python
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: '3.x'
-
-      - name: Install bqplot-image-gl and jupyterlab
-        run: |
-          echo $PWD
-          ls -al .
-          ls -al dist/
-          pip install dist/bqplot_image_gl*.whl "pytest-ipywidgets[all]" "pytest-playwright==0.5.2"
-
-      - name: Install playwright
-        run: |
-          playwright install chromium
-
-      - name: Run visual regression tests
-        run: |
-          pytest tests/ui
-
-      - name: Upload UI Test artifacts
-        if: always()
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
-        with:
-          name: bqplot-image-gl-ui-test-output
-          path: |
-            test-results
-
   tests:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@e97344095b099e1d729fe97429078c9975921d8a  # v2.6.2
     with:
       coverage: codecov
 
@@ -97,29 +64,24 @@ jobs:
         - linux: codestyle
           coverage: false
 
-        - linux: py38-test
+        - linux: py310-test
         - linux: py313-test
 
-        - macos: py37-test
-          runs-on: macos-13
-          # virtualenv (which tox uses) dropped support for making python 3.7 environments in 20.27.0
-          toxdeps: virtualenv==20.26.6 hatchling
-        - macos: py310-test
+        - macos: py311-test
         - macos: py312-test
 
-        - windows: py39-test
-        - windows: py311-test
+        - windows: py310-test
+        - windows: py313-test
 
-        - linux: py38-notebooks
-          runs-on: ubuntu-22.04
-        - macos: py37-notebooks
-          runs-on: macos-13
-          # virtualenv (which tox uses) dropped support for making python 3.7 environments in 20.27.0
-          toxdeps: virtualenv==20.26.6 hatchling
-        - windows: py39-notebooks
+        - linux: py310-notebooks
+        - macos: py312-notebooks
+        - windows: py311-notebooks
+
+        - linux: py313-visual
+          coverage: false
 
   release:
-    needs: [tests, visual-regression-tests]
+    needs: [tests]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8

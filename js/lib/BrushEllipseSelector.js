@@ -442,7 +442,7 @@ class BrushEllipseSelector extends BaseXYSelector {
                 .attr("ry", ry + extraRy)
                 .style('stroke', this.model.get('color') || 'black')
             applyStyles(this.d3ellipseHandle, this.model.get('border_style'));
-            this.updateBoundingHandles();    
+            this.updateBoundingHandles();
             this.brush.attr("transform", `rotate(${this.model.get('rotate')}, ${cx + offsetX}, ${cy + offsetY})`);
             this.brush.node().style.display = '';
         }

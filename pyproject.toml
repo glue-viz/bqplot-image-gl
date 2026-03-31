@@ -2,6 +2,7 @@
 requires = [
     "jupyterlab>=3.6",
     "hatchling",
+    "hatch-jupyter-builder>=0.5.0",
 ]
 build-backend = "hatchling.build"
 
@@ -13,29 +14,31 @@ readme = "README.md"
 authors = [
     {name = "Maarten A. Breddels", email = "maartenbreddels@gmail.com"},
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 keywords = ["ipython", "jupyter", "widgets"]
-license = {text = "MIT"}  # Add appropriate license
+license = {text = "MIT"}
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: IPython",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Topic :: Multimedia :: Graphics",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
-    'Programming Language :: Python :: 3.13',
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "ipywidgets>=7.0.0",
-    "typing-extensions",
     "bqplot>=0.12",
-    "pillow"
+    "pillow",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
 ]
 
 [project.urls]
@@ -84,3 +87,6 @@ dependencies = [
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 path = "./js"
 build_cmd = "build"
+
+[tool.ruff.lint.per-file-ignores]
+"ui-tests/jupyter_server_config.py" = ["F821"]

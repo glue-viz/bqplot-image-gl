@@ -6,12 +6,18 @@ from bqplot_image_gl._version import __version__
 
 
 drag_events = ["dragstart", "dragmove", "dragend"]
-mouse_events = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu', 'mousemove']
-keyboard_events = ['keydown', 'keyup']
+mouse_events = [
+    "click",
+    "dblclick",
+    "mouseenter",
+    "mouseleave",
+    "contextmenu",
+    "mousemove",
+]
+keyboard_events = ["keydown", "keyup"]
 
 
 class BrushEllipseSelector(BrushSelector):
-
     """BrushEllipse interval selector interaction.
 
     This 2-D selector interaction enables the user to select an ellipse
@@ -48,22 +54,23 @@ class BrushEllipseSelector(BrushSelector):
     rotate: float (default: 0)
         The rotation angle of the ellipse in degrees.
     """
-    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^' + __version__).tag(sync=True)
-    _model_module_version = Unicode('^' + __version__).tag(sync=True)
+
+    _view_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _model_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _view_module_version = Unicode("^" + __version__).tag(sync=True)
+    _model_module_version = Unicode("^" + __version__).tag(sync=True)
     pixel_aspect = Float(None, allow_none=True).tag(sync=True)
     style = Dict({"opacity": 0.3, "cursor": "grab"}).tag(sync=True)
-    border_style = Dict({"fill": "none", "stroke-width": "3px",
-                         "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
-    _view_name = Unicode('BrushEllipseSelector').tag(sync=True)
-    _model_name = Unicode('BrushEllipseSelectorModel').tag(sync=True)
+    border_style = Dict(
+        {"fill": "none", "stroke-width": "3px", "opacity": 0.3, "cursor": "col-resize"}
+    ).tag(sync=True)
+    _view_name = Unicode("BrushEllipseSelector").tag(sync=True)
+    _model_name = Unicode("BrushEllipseSelectorModel").tag(sync=True)
     rotate = Float(0).tag(sync=True)
     show_handles = Bool(False).tag(sync=True)
 
 
 class BrushRectangleSelector(BrushSelector):
-
     """BrushRectangle interval selector interaction.
 
     This 2-D selector interaction enables the user to select a rectangular
@@ -99,15 +106,16 @@ class BrushRectangleSelector(BrushSelector):
         The rotation angle of the rectangle in degrees.
     """
 
-    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^' + __version__).tag(sync=True)
-    _model_module_version = Unicode('^' + __version__).tag(sync=True)
+    _view_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _model_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _view_module_version = Unicode("^" + __version__).tag(sync=True)
+    _model_module_version = Unicode("^" + __version__).tag(sync=True)
     style = Dict({"opacity": 0.3, "cursor": "grab"}).tag(sync=True)
-    border_style = Dict({"fill": "none", "stroke-width": "3px",
-                         "opacity": 0.3, "cursor": "col-resize"}).tag(sync=True)
-    _view_name = Unicode('BrushRectangleSelector').tag(sync=True)
-    _model_name = Unicode('BrushRectangleSelectorModel').tag(sync=True)
+    border_style = Dict(
+        {"fill": "none", "stroke-width": "3px", "opacity": 0.3, "cursor": "col-resize"}
+    ).tag(sync=True)
+    _view_name = Unicode("BrushRectangleSelector").tag(sync=True)
+    _model_name = Unicode("BrushRectangleSelectorModel").tag(sync=True)
     rotate = Float(0).tag(sync=True)
     show_handles = Bool(False).tag(sync=True)
 
@@ -140,18 +148,24 @@ class MouseInteraction(Interaction):
         co-ordinates in the y-direction.
     move_throttle: Send mouse move events only every specified milliseconds.
     """
-    _view_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _model_module = Unicode('bqplot-image-gl').tag(sync=True)
-    _view_module_version = Unicode('^' + __version__).tag(sync=True)
-    _model_module_version = Unicode('^' + __version__).tag(sync=True)
-    _view_name = Unicode('MouseInteraction').tag(sync=True)
-    _model_name = Unicode('MouseInteractionModel').tag(sync=True)
-    x_scale = Instance(Scale, allow_none=True, default_value=None)\
-        .tag(sync=True, dimension='x', **widget_serialization)
-    y_scale = Instance(Scale, allow_none=True, default_value=None)\
-        .tag(sync=True, dimension='y', **widget_serialization)
-    cursor = Unicode('auto').tag(sync=True)
+
+    _view_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _model_module = Unicode("bqplot-image-gl").tag(sync=True)
+    _view_module_version = Unicode("^" + __version__).tag(sync=True)
+    _model_module_version = Unicode("^" + __version__).tag(sync=True)
+    _view_name = Unicode("MouseInteraction").tag(sync=True)
+    _model_name = Unicode("MouseInteractionModel").tag(sync=True)
+    x_scale = Instance(Scale, allow_none=True, default_value=None).tag(
+        sync=True, dimension="x", **widget_serialization
+    )
+    y_scale = Instance(Scale, allow_none=True, default_value=None).tag(
+        sync=True, dimension="y", **widget_serialization
+    )
+    cursor = Unicode("auto").tag(sync=True)
     move_throttle = Int(50).tag(sync=True)
     next = Instance(Interaction, allow_none=True).tag(sync=True, **widget_serialization)
-    events = List(Unicode(), default_value=drag_events + mouse_events + keyboard_events,
-                  allow_none=True).tag(sync=True)
+    events = List(
+        Unicode(),
+        default_value=drag_events + mouse_events + keyboard_events,
+        allow_none=True,
+    ).tag(sync=True)
