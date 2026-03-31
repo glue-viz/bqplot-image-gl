@@ -39,13 +39,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
-      - name: Update visual snapshots
-        run: tox -e py313-visual -- --solara-update-snapshots
+      - name: Generate baseline images
+        run: tox -e py313-visual -- --mpl-generate-path=tests/ui/baseline
 
       - name: Compress screenshots
         run: |
           sudo apt install optipng
-          find tests/ui/snapshots -name '*.png' -exec optipng {} +
+          find tests/ui/baseline -name '*.png' -exec optipng {} +
 
       - name: Commit reference images
         run: |
@@ -54,7 +54,7 @@ jobs:
 
           git pull
 
-          git add tests/ui/snapshots
+          git add tests/ui/baseline
 
           git commit -m "chore: Update visual references"
           git push

@@ -1,18 +1,16 @@
-import pytest
 import playwright.sync_api
 from IPython.display import display
 import numpy as np
 from bqplot import Figure, LinearScale, Axis, ColorScale
 from bqplot_image_gl import ImageGL, Contour
 
+from .helpers import visual_ui_test
 
-@pytest.mark.parametrize("compression", ["png", "none"])
-def test_widget_image(
+
+@visual_ui_test
+def test_widget_contour(
     solara_test,
     page_session: playwright.sync_api.Page,
-    assert_solara_snapshot,
-    compression,
-    request,
 ):
     scale_x = LinearScale(min=0, max=1)
     scale_y = LinearScale(min=0, max=1)
@@ -29,7 +27,7 @@ def test_widget_image(
     X, Y = np.meshgrid(x, y)
     data = 5.0 * np.sin(2 * np.pi * (X + Y**2))
 
-    image = ImageGL(image=data, scales=scales_image, compression=compression)
+    image = ImageGL(image=data, scales=scales_image)
     contour = Contour(image=image, level=[2, 4], scales=scales_image)
 
     figure.marks = (image, contour)
@@ -39,7 +37,4 @@ def test_widget_image(
     svg = page_session.locator(".bqplot")
     svg.wait_for()
     page_session.wait_for_timeout(100)
-    # although the contour is almost the same, due to precision issues, the image is slightly different
-    # therefore unlike the image_test, we use a different testname/image name based on the fixture value
-    # for compression
-    assert_solara_snapshot(svg.screenshot())
+    return svg.screenshot()

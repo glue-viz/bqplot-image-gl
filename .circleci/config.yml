@@ -1,1 +1,40 @@
 version: 2.1
+
+jobs:
+
+  visual:
+    parameters:
+      jobname:
+        type: string
+    docker:
+      - image: cimg/python:3.13
+    environment:
+      TOXENV: << parameters.jobname >>
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 libxdamage1 libgbm1 libpango-1.0-0 libcairo2 libasound2
+            pip install pip tox --upgrade
+      - run:
+          name: Run tests
+          command: tox -v
+      - store_artifacts:
+          path: results
+      - run:
+          name: "Image comparison page is available at: "
+          command: echo "${CIRCLE_BUILD_URL}/artifacts/${CIRCLE_NODE_INDEX}/results/fig_comparison.html"
+
+workflows:
+  version: 2
+
+  visual-tests:
+    jobs:
+      - visual:
+          name: << matrix.jobname >>
+          matrix:
+            parameters:
+              jobname:
+                - "py313-visual"
