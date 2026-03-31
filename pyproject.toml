@@ -39,8 +39,6 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
-    "pytest-ipywidgets[all]",
-    "pytest-playwright==0.5.2",
 ]
 
 [project.urls]
