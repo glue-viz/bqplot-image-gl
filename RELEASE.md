@@ -1,40 +1,27 @@
-# Using CI
+# Releasing bqplot-image-gl
 
-## Auto bump
+Releases are automated via GitHub Actions and PyPI trusted publishing.
 
-Use
+## Steps
 
-   $ ./release.sh minor
+1. Update the version in `bqplot_image_gl/_version.py` and `js/package.json`.
+2. Commit and push to `main`:
+   ```
+   git add bqplot_image_gl/_version.py js/package.json
+   git commit -m "Bump version: X.Y.Z → A.B.C"
+   git push upstream main
+   ```
+3. Create a new release from the [GitHub Releases page](https://github.com/glue-viz/bqplot-image-gl/releases/new):
+   - Set the tag to `vA.B.C` (e.g. `v1.9.0`)
+   - Use "Generate release notes" to auto-populate the changelog
+   - Publish the release
 
-Or
+The CI will automatically build and upload the package to PyPI using trusted publishing.
+The release notes will also be appended to `CHANGES.md` on `main`.
 
-    $ ./release.sh patch
+## Prerequisites
 
-## Manual bump
- * Update bqplot-image-gl/_version.py
- * Update js/package.json
- * Add and commit, e.g. `git add -u; git commit -m 'Update to version 1.8.0'`
- * Tag: `git tag 1.8.0`
- * Release using push: `git push upstream master 1.8.0`
-
-# Manual:
-## To release a new version of bqplot-image-gl on PyPI:
-
-Update _version.py (set release version, remove 'dev')
-git add the _version.py file and git commit
-`python setup.py sdist upload`
-`python setup.py bdist_wheel upload`
-`git tag -a X.X.X -m 'comment'`
-Update _version.py (add 'dev' and increment minor)
-git add and git commit
-git push
-git push --tags
-
-##  To release a new version of bqplot-image-gl on NPM:
-
-```
-# clean out the `dist` and `node_modules` directories
-git clean -fdx
-npm install
-npm publish
-```
+- A `pypi` environment must be configured in the GitHub repo settings
+  (Settings > Environments > `pypi`).
+- Trusted publishing must be configured on PyPI for this repository
+  (see [PyPI docs](https://docs.pypi.org/trusted-publishers/)).
