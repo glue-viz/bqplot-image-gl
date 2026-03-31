@@ -1,3 +1,4 @@
+import pytest
 import playwright.sync_api
 from IPython.display import display
 import numpy as np
@@ -7,10 +8,12 @@ from bqplot_image_gl import ImageGL, Contour
 from .helpers import visual_ui_test
 
 
+@pytest.mark.parametrize("compression", ["png", "none"])
 @visual_ui_test
 def test_widget_contour(
     solara_test,
     page_session: playwright.sync_api.Page,
+    compression,
 ):
     scale_x = LinearScale(min=0, max=1)
     scale_y = LinearScale(min=0, max=1)
@@ -27,7 +30,7 @@ def test_widget_contour(
     X, Y = np.meshgrid(x, y)
     data = 5.0 * np.sin(2 * np.pi * (X + Y**2))
 
-    image = ImageGL(image=data, scales=scales_image)
+    image = ImageGL(image=data, scales=scales_image, compression=compression)
     contour = Contour(image=image, level=[2, 4], scales=scales_image)
 
     figure.marks = (image, contour)
