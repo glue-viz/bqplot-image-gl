@@ -41,6 +41,14 @@ test = [
     "pytest-cov",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-ipywidgets[all]",
+    "pytest-playwright==0.5.2",
+]
+
 [project.urls]
 Homepage = "https://github.com/glue-viz/bqplot-image-gl"
 
