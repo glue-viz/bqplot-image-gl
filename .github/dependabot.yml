@@ -12,14 +12,9 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      npm-all:
+      npm:
         patterns:
           - "*"
-        dependency-type: "production"
-      npm-dev:
-        patterns:
-          - "*"
-        dependency-type: "development"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
