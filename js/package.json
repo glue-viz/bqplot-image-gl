@@ -71,8 +71,9 @@
       "d3-selection": {
         "bundled": false
       },
-      "threejs": {
-        "bundled": false
+      "three": {
+        "bundled": false,
+        "singleton": true
       }
     }
   }

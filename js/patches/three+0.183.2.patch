@@ -1,0 +1,48 @@
+diff --git a/node_modules/three/build/three.core.js b/node_modules/three/build/three.core.js
+--- a/node_modules/three/build/three.core.js
++++ b/node_modules/three/build/three.core.js
+@@ -6967,7 +6967,7 @@
+
+ }
+
+-let _sourceId = 0;
++let _sourceId = 10000;
+
+ /**
+  * Represents the data source of a texture.
+@@ -7192,7 +7192,7 @@
+
+ }
+
+-let _textureId = 0;
++let _textureId = 10000;
+
+ const _tempVec3 = /*@__PURE__*/ new Vector3();
+
+@@ -11642,7 +11642,7 @@
+
+ }
+
+-let _object3DId = 0;
++let _object3DId = 10000;
+
+ const _v1$6 = /*@__PURE__*/ new Vector3();
+ const _q1 = /*@__PURE__*/ new Quaternion();
+@@ -18049,7 +18049,7 @@
+
+ }
+
+-let _id$1 = 0;
++let _id$1 = 10000;
+
+ const _m1 = /*@__PURE__*/ new Matrix4();
+ const _obj = /*@__PURE__*/ new Object3D();
+@@ -20323,7 +20323,7 @@
+
+ }
+
+-let _materialId = 0;
++let _materialId = 10000;
+
+ /**
+  * Abstract base class for materials.
