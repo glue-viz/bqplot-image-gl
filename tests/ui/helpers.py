@@ -1,7 +1,6 @@
 from functools import wraps
 
 import pytest
-from IPython.display import display
 
 try:
     import solara  # noqa
@@ -13,17 +12,16 @@ except ImportError:
 else:
     HAS_VISUAL_TEST_DEPS = True
 
-__all__ = ['visual_ui_test']
+__all__ = ["visual_ui_test"]
 
 
 class DummyFigure:
-
     def __init__(self, png_bytes):
         self._png_bytes = png_bytes
 
     def savefig(self, filename_or_fileobj, *args, **kwargs):
         if isinstance(filename_or_fileobj, str):
-            with open(filename_or_fileobj, 'wb') as f:
+            with open(filename_or_fileobj, "wb") as f:
                 f.write(self._png_bytes)
         else:
             filename_or_fileobj.write(self._png_bytes)

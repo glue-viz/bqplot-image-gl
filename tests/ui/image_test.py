@@ -101,9 +101,7 @@ def test_widget_image_rgba_transparent_no_color_leak(
 
     # A green background covering the full plot area
     green_bg = np.array([[[0, 255, 0, 255]]], dtype=np.uint8)
-    bg = ImageGL(
-        image=green_bg, scales=scales_image, x=[0, 1], y=[0, 1]
-    )
+    bg = ImageGL(image=green_bg, scales=scales_image, x=[0, 1], y=[0, 1])
 
     # Foreground: bright red RGB but fully transparent alpha.
     # Before the fix this red would leak through and tint the green background.
