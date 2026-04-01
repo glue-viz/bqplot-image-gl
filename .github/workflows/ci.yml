@@ -147,11 +147,18 @@ jobs:
           echo "__version__ = \"$VERSION\"" > bqplot_image_gl/_version.py
           cd js && npm version $VERSION --no-git-tag-version
 
-      - name: Commit version update
+      - name: Update changelog
+        uses: stefanzweifel/changelog-updater-action@a938690fad7edf25368f37e43a1ed1b34303eb36  # v1
+        with:
+          release-notes: ${{ github.event.release.body }}
+          latest-version: ${{ github.event.release.name }}
+          path-to-changelog: CHANGES.md
+
+      - name: Commit version and changelog update
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bqplot_image_gl/_version.py js/package.json
-          git diff --staged --quiet || git commit -m "Update version to $VERSION [skip ci]"
+          git add bqplot_image_gl/_version.py js/package.json CHANGES.md
+          git diff --staged --quiet || git commit -m "Update version to $VERSION and changelog [skip ci]"
           git push
