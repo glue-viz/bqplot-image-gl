@@ -51,7 +51,7 @@
     "jupyter-dataserializers": "^3.0.1",
     "lodash": "^4.17.4",
     "patch-package": "^6.4.7",
-    "three": "^0.97.0"
+    "three": "^0.183.2"
   },
   "jupyterlab": {
     "extension": "lib/labplugin",
