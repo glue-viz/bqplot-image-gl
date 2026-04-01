@@ -4,9 +4,9 @@ on:
   push:
     branches:
     - main
-    tags:
-    - '*'
   pull_request:
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -37,14 +37,21 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install hatch jupyterlab
+          pip install build jupyterlab
+
+      - name: Set version from release tag
+        if: github.event_name == 'release'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "__version__ = \"$VERSION\"" > bqplot_image_gl/_version.py
+          cd js && npm version $VERSION --no-git-tag-version
 
       - name: Install JavaScript dependencies
         run: (cd js && npm ci && npm run build && npm pack)
 
       - name: Build
         run: |
-          hatch build
+          python -m build
 
       - name: Upload builds
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -77,9 +84,28 @@ jobs:
         - macos: py312-notebooks
         - windows: py311-notebooks
 
-  release:
-    needs: [tests]
+  publish-pypi:
+    needs: [build, tests]
+    if: github.event_name == 'release'
     runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: bqplot-image-gl-dist-${{ github.run_number }}
+
+      - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b54f72e44af12044e0e68f2a  # v1.12.4
+
+  publish-npm:
+    needs: [build, tests]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
@@ -88,33 +114,44 @@ jobs:
       - name: Install node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
         with:
-          node-version: "20.x"
+          node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install twine wheel jupyter-packaging jupyterlab
-
-      - name: Publish the Python package
-        if: startsWith(github.event.ref, 'refs/tags/v')
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload --skip-existing dist/*.whl dist/*.tar.gz
-
       - name: Publish the NPM package
-        if: startsWith(github.event.ref, 'refs/tags/v')
         run: |
-          echo $PRE_RELEASE
           if [[ $PRE_RELEASE == "true" ]]; then export TAG="next"; else export TAG="latest"; fi
           cd js
-          npm publish --tag ${TAG} --access public *.tgz
+          npm publish --tag ${TAG} --access public --provenance *.tgz
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           PRE_RELEASE: ${{ github.event.release.prerelease }}
+
+  update-version:
+    needs: [publish-pypi, publish-npm]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Install node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: "22.x"
+
+      - name: Update version files
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "__version__ = \"$VERSION\"" > bqplot_image_gl/_version.py
+          cd js && npm version $VERSION --no-git-tag-version
+
+      - name: Commit version update
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bqplot_image_gl/_version.py js/package.json
+          git diff --staged --quiet || git commit -m "Update version to $VERSION [skip ci]"
+          git push
