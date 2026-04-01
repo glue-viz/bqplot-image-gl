@@ -77,9 +77,6 @@ jobs:
         - macos: py312-notebooks
         - windows: py311-notebooks
 
-        - linux: py313-visual
-          coverage: false
-
   release:
     needs: [tests]
     runs-on: ubuntu-24.04

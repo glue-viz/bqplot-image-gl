@@ -7,7 +7,7 @@ from .helpers import visual_ui_test
 
 
 @pytest.mark.parametrize("compression", ["png", "none"])
-@visual_ui_test(filename="test_widget_image.png")
+@visual_ui_test
 def test_widget_image(
     ipywidgets_runner,
     page_session: playwright.sync_api.Page,
@@ -43,7 +43,7 @@ def test_widget_image(
 
 
 @pytest.mark.parametrize("compression", ["png", "none"])
-@visual_ui_test(filename="test_widget_image_rgba.png")
+@visual_ui_test
 def test_widget_image_rgba(
     solara_test,
     page_session: playwright.sync_api.Page,
@@ -81,7 +81,7 @@ def test_widget_image_rgba(
 
 
 @pytest.mark.parametrize("compression", ["png", "none"])
-@visual_ui_test(filename="test_widget_image_rgba_transparent_no_color_leak.png")
+@visual_ui_test
 def test_widget_image_rgba_transparent_no_color_leak(
     solara_test,
     page_session: playwright.sync_api.Page,

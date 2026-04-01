@@ -32,7 +32,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -40,7 +40,7 @@ jobs:
           pip install tox
 
       - name: Generate baseline images
-        run: tox -e py313-visual -- --mpl-generate-path=tests/ui/baseline
+        run: tox -e py311-visual -- --mpl-generate-path=tests/ui/baseline
 
       - name: Compress screenshots
         run: |
