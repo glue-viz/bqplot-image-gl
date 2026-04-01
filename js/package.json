@@ -37,7 +37,7 @@
     "raw-loader": "^4",
     "rimraf": "^2.6.1",
     "webpack": "^5",
-    "webpack-cli": "^4"
+    "webpack-cli": "^7"
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.0.0 || ^2.0.0 || ^3.0.0 || ^4 || ^6",
