@@ -2,6 +2,7 @@ changelog:
   exclude:
     authors:
       - pre-commit-ci
+      - dependabot[bot]
   categories:
     - title: Bug Fixes
       labels:
