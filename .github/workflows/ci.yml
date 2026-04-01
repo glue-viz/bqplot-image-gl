@@ -123,7 +123,6 @@ jobs:
           cd js
           npm publish --tag ${TAG} --access public --provenance *.tgz
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           PRE_RELEASE: ${{ github.event.release.prerelease }}
 
   update-version:
