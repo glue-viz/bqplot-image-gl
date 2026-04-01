@@ -77,7 +77,7 @@ jobs:
         - macos: py312-notebooks
         - windows: py311-notebooks
 
-        - linux: py313-visual
+        - linux: py311-visual
           coverage: false
 
   release:
