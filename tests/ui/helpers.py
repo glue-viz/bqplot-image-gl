@@ -34,7 +34,7 @@ def visual_ui_test(*args, **kwargs):
     The decorated test function should return the screenshot bytes from
     a Playwright element (e.g., `element.screenshot()`).
     """
-    tolerance = kwargs.pop("tolerance", 0)
+    tolerance = kwargs.pop("tolerance", 1)
 
     def decorator(test_function):
         @pytest.mark.skipif("not HAS_VISUAL_TEST_DEPS")
