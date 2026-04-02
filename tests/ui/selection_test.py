@@ -1,3 +1,4 @@
+import pytest
 import playwright.sync_api
 from IPython.display import display
 import numpy as np
@@ -5,10 +6,12 @@ import numpy as np
 from .helpers import visual_ui_test
 
 
+@pytest.mark.parametrize("show_handles", [False, True])
 @visual_ui_test
 def test_brush_rectangle_selector(
     solara_test,
     page_session: playwright.sync_api.Page,
+    show_handles,
 ):
     """Regression test: BrushRectangleSelector must render a visible selection.
 
@@ -27,10 +30,10 @@ def test_brush_rectangle_selector(
 
     scales_image = {"x": scale_x, "y": scale_y, "image": ColorScale(min=0, max=1)}
 
-    data = np.random.RandomState(42).random((64, 64))
+    data = np.full((64, 64), 0.5)
     image = ImageGL(image=data, scales=scales_image)
 
-    brush = BrushRectangleSelector(x_scale=scale_x, y_scale=scale_y)
+    brush = BrushRectangleSelector(x_scale=scale_x, y_scale=scale_y, show_handles=show_handles)
     brush.selected_x = [0.2, 0.8]
     brush.selected_y = [0.3, 0.7]
 
@@ -45,10 +48,12 @@ def test_brush_rectangle_selector(
     return svg.screenshot()
 
 
+@pytest.mark.parametrize("show_handles", [False, True])
 @visual_ui_test
 def test_brush_ellipse_selector(
     solara_test,
     page_session: playwright.sync_api.Page,
+    show_handles,
 ):
     """Regression test: BrushEllipseSelector must render a visible selection.
 
@@ -67,10 +72,10 @@ def test_brush_ellipse_selector(
 
     scales_image = {"x": scale_x, "y": scale_y, "image": ColorScale(min=0, max=1)}
 
-    data = np.random.RandomState(42).random((64, 64))
+    data = np.full((64, 64), 0.5)
     image = ImageGL(image=data, scales=scales_image)
 
-    brush = BrushEllipseSelector(x_scale=scale_x, y_scale=scale_y)
+    brush = BrushEllipseSelector(x_scale=scale_x, y_scale=scale_y, show_handles=show_handles)
     brush.selected_x = [0.2, 0.8]
     brush.selected_y = [0.3, 0.7]
 
