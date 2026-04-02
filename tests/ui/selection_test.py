@@ -33,7 +33,9 @@ def test_brush_rectangle_selector(
     data = np.full((64, 64), 0.5)
     image = ImageGL(image=data, scales=scales_image)
 
-    brush = BrushRectangleSelector(x_scale=scale_x, y_scale=scale_y, show_handles=show_handles)
+    brush = BrushRectangleSelector(
+        x_scale=scale_x, y_scale=scale_y, show_handles=show_handles
+    )
     brush.selected_x = [0.2, 0.8]
     brush.selected_y = [0.3, 0.7]
 
@@ -75,7 +77,9 @@ def test_brush_ellipse_selector(
     data = np.full((64, 64), 0.5)
     image = ImageGL(image=data, scales=scales_image)
 
-    brush = BrushEllipseSelector(x_scale=scale_x, y_scale=scale_y, show_handles=show_handles)
+    brush = BrushEllipseSelector(
+        x_scale=scale_x, y_scale=scale_y, show_handles=show_handles
+    )
     brush.selected_x = [0.2, 0.8]
     brush.selected_y = [0.3, 0.7]
 
