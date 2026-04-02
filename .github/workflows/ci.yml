@@ -96,7 +96,7 @@ jobs:
         with:
           name: bqplot-image-gl-dist-${{ github.run_number }}
 
-      - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b54f72e44af12044e0e68f2a  # v1.12.4
+      - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
 
   publish-npm:
     needs: [build, tests]
@@ -116,6 +116,9 @@ jobs:
         with:
           node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Publish the NPM package
         run: |
