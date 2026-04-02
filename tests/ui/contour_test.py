@@ -41,3 +41,42 @@ def test_widget_contour(
     svg.wait_for()
     page_session.wait_for_timeout(100)
     return svg.screenshot()
+
+
+@visual_ui_test
+def test_widget_contour_labeled(
+    solara_test,
+    page_session: playwright.sync_api.Page,
+):
+    scale_x = LinearScale(min=0, max=1)
+    scale_y = LinearScale(min=0, max=1)
+    scales = {"x": scale_x, "y": scale_y}
+    axis_x = Axis(scale=scale_x, label="x")
+    axis_y = Axis(scale=scale_y, label="y", orientation="vertical")
+
+    figure = Figure(scales=scales, axes=[axis_x, axis_y])
+
+    scales_image = {"x": scale_x, "y": scale_y, "image": ColorScale(min=0, max=2)}
+
+    x = np.linspace(0, 1, 128)
+    y = np.linspace(0, 1, 256)
+    X, Y = np.meshgrid(x, y)
+    data = 5.0 * np.sin(2 * np.pi * (X + Y**2))
+
+    image = ImageGL(image=data, scales=scales_image, compression="png")
+    contour = Contour(
+        image=image,
+        level=[1, 3],
+        label=["low", "high"],
+        color=["red", "blue"],
+        scales=scales_image,
+    )
+
+    figure.marks = (image, contour)
+
+    display(figure)
+
+    svg = page_session.locator(".bqplot")
+    svg.wait_for()
+    page_session.wait_for_timeout(100)
+    return svg.screenshot()

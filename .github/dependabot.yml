@@ -13,6 +13,8 @@ updates:
       default-days: 7
     ignore:
       - dependency-name: "three"
+      - dependency-name: "d3"
+      - dependency-name: "d3-selection"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
