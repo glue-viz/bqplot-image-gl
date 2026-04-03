@@ -43,3 +43,4 @@ workflows:
             parameters:
               jobname:
                 - "py311-visual"
+                - "py311-devdeps-visual"
