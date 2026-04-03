@@ -5,7 +5,9 @@ from .helpers import HAS_VISUAL_TEST_DEPS
 
 import pytest
 
-pytestmark = pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="missing visual test deps")
+pytestmark = pytest.mark.skipif(
+    not HAS_VISUAL_TEST_DEPS, reason="missing visual test deps"
+)
 
 
 def test_view_listener_reports_dimensions(
