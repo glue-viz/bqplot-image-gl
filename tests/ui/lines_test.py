@@ -52,8 +52,12 @@ def test_widget_lines_two(
 
     line1 = LinesGL(x=x, y=np.sin(4 * np.pi * x), scales=scales, colors=["orange"])
     line2 = LinesGL(
-        x=x, y=np.cos(4 * np.pi * x), scales=scales, colors=["steelblue"],
-        stroke_width=3, opacities=[0.6],
+        x=x,
+        y=np.cos(4 * np.pi * x),
+        scales=scales,
+        colors=["steelblue"],
+        stroke_width=3,
+        opacities=[0.6],
     )
 
     figure = Figure(scales=scales, axes=[axis_x, axis_y], marks=[line1, line2])
