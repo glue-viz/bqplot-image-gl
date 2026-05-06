@@ -7,11 +7,24 @@ var _ = require('lodash');
 var d3 = require("d3");
 var bqplot = require('bqplot');
 var THREE = require('three');
+var {colorRange, computeAndSetDomain, delDomain, setRange} = require('./utils');
 
 var interpolations = {'nearest': THREE.NearestFilter, 'bilinear': THREE.LinearFilter};
 
 var jupyter_dataserializers = require("jupyter-dataserializers");
 var serialize = require("./serialize");
+
+function loadBqplotGL() {
+    var amdRequire = typeof window !== "undefined" && (window.requirejs || window.require);
+    if(!amdRequire) {
+        return Promise.reject(new Error("bqplot-image-gl with bqplot 0.13 requires the bqplot-gl frontend module, but no AMD loader is available."));
+    }
+    return new Promise((resolve, reject) => {
+        amdRequire(["bqplot-gl"], resolve, () => {
+            reject(new Error("bqplot-image-gl with bqplot 0.13 requires bqplot-gl. Install and enable bqplot-gl, or use bqplot 0.12."));
+        });
+    });
+}
 
 class ImageGLModel extends bqplot.MarkModel {
 
@@ -51,7 +64,7 @@ class ImageGLModel extends bqplot.MarkModel {
     close(comm_closed) {
         const image = this.get("image");
         if(image.image && image.image.src) {
-            URL.revokeObjectURL(previous.image.src);
+            URL.revokeObjectURL(image.image.src);
         }
         return super.close(comm_closed);
     }
@@ -74,16 +87,16 @@ class ImageGLModel extends bqplot.MarkModel {
 
         if(x_scale) {
             if(!this.get("preserve_domain").x) {
-                x_scale.compute_and_set_domain(this.mark_data.x, this.model_id + "_x");
+                computeAndSetDomain(x_scale, this.mark_data.x, this.model_id + "_x");
             } else {
-                x_scale.del_domain([], this.model_id + "_x");
+                delDomain(x_scale, [], this.model_id + "_x");
             }
         }
         if(y_scale) {
             if(!this.get("preserve_domain").y) {
-                y_scale.compute_and_set_domain(this.mark_data.y, this.model_id + "_y");
+                computeAndSetDomain(y_scale, this.mark_data.y, this.model_id + "_y");
             } else {
-                y_scale.del_domain([], this.model_id + "_y");
+                delDomain(y_scale, [], this.model_id + "_y");
             }
         }
     }
@@ -176,7 +189,7 @@ class ImageGLView extends bqplot.Mark {
         this.scene = new THREE.Scene();
         this.scene.add(this.image_mesh);
 
-        return base_render_promise.then(() => {
+        return base_render_promise.then(() => this.initialize_webgl_compat()).then(() => {
             this.create_listeners();
             this.update_minmax();
             this.update_colormap();
@@ -188,6 +201,32 @@ class ImageGLView extends bqplot.Mark {
                 this.draw();
             });
         });
+    }
+
+    initialize_webgl_compat() {
+        var fig = this.parent;
+        if(fig.extras && fig.extras.webGLRequestRender) {
+            this.register_webgl_mark();
+            return Promise.resolve();
+        }
+        if(fig.update_gl && fig.createWebGLRenderer) {
+            fig.createWebGLRenderer();
+            return Promise.resolve();
+        }
+        return loadBqplotGL().then((bqplot_gl) => {
+            if(!bqplot_gl.initializeBqplotFigure) {
+                throw new Error("bqplot-gl did not export initializeBqplotFigure.");
+            }
+            bqplot_gl.initializeBqplotFigure(fig);
+            this.register_webgl_mark();
+        });
+    }
+
+    register_webgl_mark() {
+        var marks = this.parent.extras && this.parent.extras.webGLMarks;
+        if(marks && !marks.includes(this)) {
+            marks.push(this);
+        }
     }
 
     set_positional_scales() {
@@ -209,10 +248,10 @@ class ImageGLView extends bqplot.Mark {
         var x_scale = this.scales.x,
             y_scale = this.scales.y;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            setRange(x_scale, this.parent.padded_range("x", x_scale.model));
         }
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            setRange(y_scale, this.parent.padded_range("y", y_scale.model));
         }
     }
 
@@ -293,7 +332,7 @@ class ImageGLView extends bqplot.Mark {
         }
 
         // convert the d3 color scale to a texture
-        var colors = this.scales.image.model.color_range;
+        var colors = colorRange(this.scales.image.model);
         var color_scale = d3.scaleLinear()
                                   .range(colors)
                                   .domain(_.range(colors.length).map((i) => i/(colors.length-1)));
@@ -370,22 +409,30 @@ class ImageGLView extends bqplot.Mark {
     }
 
     update_scene(animate) {
-        this.parent.update_gl();
+        if(this.parent.extras && this.parent.extras.webGLRequestRender) {
+            this.parent.extras.webGLRequestRender();
+        } else {
+            this.parent.update_gl();
+        }
     }
 
     render_gl() {
         var fig = this.parent;
-        var renderer = fig.renderer;
+        var renderer = fig.extras && fig.extras.webGLRenderer ?
+            fig.extras.webGLRenderer.renderer :
+            fig.renderer;
         var image = this.model.get("image");
 
         var x_scale = this.scales.x ? this.scales.x : this.parent.scale_x;
         var y_scale = this.scales.y ? this.scales.y : this.parent.scale_y;
 
         // set the camera such that we work in pixel coordinates
+        var plotarea_width = fig.plotareaWidth !== undefined ? fig.plotareaWidth : fig.plotarea_width;
+        var plotarea_height = fig.plotareaHeight !== undefined ? fig.plotareaHeight : fig.plotarea_height;
         this.camera.left  = 0;
-        this.camera.right = fig.plotarea_width;
+        this.camera.right = plotarea_width;
         this.camera.bottom = 0;
-        this.camera.top = fig.plotarea_height;
+        this.camera.top = plotarea_height;
         this.camera.updateProjectionMatrix();
 
         var x = this.model.get('x');
@@ -397,7 +444,7 @@ class ImageGLView extends bqplot.Mark {
 
         var pixel_width  = x1_pixel - x0_pixel;
         var pixel_height = y1_pixel - y0_pixel;
-        this.image_mesh.position.set(x0_pixel + pixel_width/2, fig.plotarea_height - (y0_pixel + pixel_height/2), 0);
+        this.image_mesh.position.set(x0_pixel + pixel_width/2, plotarea_height - (y0_pixel + pixel_height/2), 0);
         this.image_mesh.scale.set(pixel_width, pixel_height, 1);
 
         this.image_material.uniforms.range_x.value = x_scale.scale.range();
@@ -411,6 +458,10 @@ class ImageGLView extends bqplot.Mark {
 
         renderer.render(this.scene, this.camera);
         var canvas = renderer.domElement;
+    }
+
+    renderGL() {
+        this.render_gl();
     }
 
     relayout() {

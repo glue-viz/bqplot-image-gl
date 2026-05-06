@@ -6,6 +6,7 @@ import * as d3contour from "d3-contour";
 import * as d3geo from "d3-geo";
 import * as d3 from "d3";
 import * as jupyter_dataserializers from "jupyter-dataserializers";
+import {colorRange, domain, setRange} from "./utils";
 
 
 class ContourModel extends bqplot.MarkModel {
@@ -141,12 +142,13 @@ class ContourView extends bqplot.Mark {
             return color_array[index % color_array.length];
         }
         const model = this.model;
-        var colors = this.scales.image.model.color_range;
+        var colors = colorRange(this.scales.image.model);
+        var color_domain = domain(this.scales.image.model);
         var color_scale = d3.scaleLinear()
                                   .range(colors)
-                                  .domain(this.scales.image.model.domain);
-        const min = this.scales.image.model.domain[0];
-        const max = this.scales.image.model.domain[this.scales.image.model.domain.length-1];
+                                  .domain(color_domain);
+        const min = color_domain[0];
+        const max = color_domain[color_domain.length-1];
         const delta = max - min;
         // a good default color is one that is 50% off from the value of the colormap
         const level_plus_50_percent = ((threshold - min) + delta / 2) % delta + min;
@@ -179,10 +181,10 @@ class ContourView extends bqplot.Mark {
         var x_scale = this.scales.x,
             y_scale = this.scales.y;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            setRange(x_scale, this.parent.padded_range("x", x_scale.model));
         }
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            setRange(y_scale, this.parent.padded_range("y", y_scale.model));
         }
     }
     draw() {

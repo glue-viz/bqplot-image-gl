@@ -8,6 +8,11 @@ var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']}
 ]
 
+var widgetExternals = {
+    '@jupyter-widgets/base': '@jupyter-widgets/base',
+    'bqplot': 'bqplot',
+};
+
 
 module.exports = [
     {// Notebook extension
@@ -45,7 +50,7 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base', 'bqplot']
+        externals: widgetExternals
     },
     {// Embeddable bqplot-image-gl bundle
      //
@@ -73,6 +78,6 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base', 'bqplot']
+        externals: widgetExternals
     }
 ];

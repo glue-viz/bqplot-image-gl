@@ -9,6 +9,7 @@ const d3 = require("d3");
 const d3_drag_1 = require("d3-drag");
 const _ = require("lodash");
 const d3_selection_1 = require("d3-selection");
+const { setRange } = require("./utils");
 const d3GetEvent = function () { return require("d3-selection").event || window.event; }.bind(this);
 
 const clickEvents = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'contextmenu'];
@@ -208,8 +209,8 @@ class MouseInteraction extends Interaction_1.Interaction {
     }
 
     updateScaleRanges() {
-        this.x_scale.set_range(this.parent.padded_range("x", this.x_scale.model));
-        this.y_scale.set_range(this.parent.padded_range("y", this.y_scale.model));
+        setRange(this.x_scale, this.parent.padded_range("x", this.x_scale.model));
+        setRange(this.y_scale, this.parent.padded_range("y", this.y_scale.model));
     }
     remove() {
         super.remove();
