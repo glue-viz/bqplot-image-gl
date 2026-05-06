@@ -42,4 +42,5 @@ workflows:
           matrix:
             parameters:
               jobname:
-                - "py311-visual"
+                - "py311-bqplot012-visual"
+                - "py311-bqplot013-visual"
