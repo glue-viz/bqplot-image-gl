@@ -44,9 +44,8 @@ workflows:
       - visual:
           name: py311-bqplot012-visual
           jobname: py311-bqplot012-visual
-          # The bqplot 0.12 compatibility path is the classic widget API.
-          # The JupyterLab runner loads the labextension and can mix Lab 3
-          # runtime packages with Lab 4 extension metadata.
+          # TODO: re-enable the JupyterLab runner once the bqplot 0.12
+          # compatibility path works there again.
           pytest_addopts: '-k "not jupyter_lab"'
       - visual:
           name: py311-bqplot013-visual
