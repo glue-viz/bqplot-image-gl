@@ -6,10 +6,14 @@ jobs:
     parameters:
       jobname:
         type: string
+      pytest_addopts:
+        type: string
+        default: ""
     docker:
       - image: cimg/python:3.11
     environment:
       TOXENV: << parameters.jobname >>
+      PYTEST_ADDOPTS: << parameters.pytest_addopts >>
     steps:
       - checkout
       - run:
@@ -38,9 +42,12 @@ workflows:
   visual-tests:
     jobs:
       - visual:
-          name: << matrix.jobname >>
-          matrix:
-            parameters:
-              jobname:
-                - "py311-bqplot012-visual"
-                - "py311-bqplot013-visual"
+          name: py311-bqplot012-visual
+          jobname: py311-bqplot012-visual
+          # The bqplot 0.12 compatibility path is the classic widget API.
+          # The JupyterLab runner loads the labextension and can mix Lab 3
+          # runtime packages with Lab 4 extension metadata.
+          pytest_addopts: '-k "not jupyter_lab"'
+      - visual:
+          name: py311-bqplot013-visual
+          jobname: py311-bqplot013-visual

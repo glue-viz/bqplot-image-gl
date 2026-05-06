@@ -53,6 +53,12 @@ path = "bqplot_image_gl/_version.py"
 [tool.hatch.build.targets.sdist]
 exclude = [
     ".github",
+    ".tox",
+    ".venv*",
+    "env",
+    "js/_nm*",
+    "results",
+    "widget-dev",
 ]
 
 [tool.hatch.build.targets.wheel]
