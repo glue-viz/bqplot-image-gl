@@ -5,6 +5,12 @@ var d3 = require("d3");
 var bqplot = require('bqplot');
 var THREE = require('three');
 var values = require('./values');
+var {
+    ensure_bqplot_013_webgl_figure,
+    get_bqplot_012_plotarea,
+    get_bqplot_013_plotarea,
+    request_webgl_render,
+} = require("./compat");
 
 var Line2 = require('./examples/lines/Line2').Line2;
 var LineMaterial = require('./examples/lines/LineMaterial').LineMaterial;
@@ -61,6 +67,7 @@ class LinesGLView extends bqplot.Lines {
 
         const result = await super.render();
         window.lastLinesGLView = this;
+        await ensure_bqplot_013_webgl_figure(this);
 
 
         this.material.onBeforeCompile = (shader) => {
@@ -176,30 +183,48 @@ class LinesGLView extends bqplot.Lines {
 
 
     render_gl() {
+        this.render_bqplot_012_webgl();
+    }
+
+    renderGL() {
+        this.render_bqplot_013_webgl();
+    }
+
+    render_bqplot_012_webgl() {
         var fig = this.parent;
-        var renderer = fig.renderer;
-        this.camera.left = 0;
-        this.camera.right = fig.plotarea_width;
-        this.camera.bottom = 0;
-        this.camera.top = fig.plotarea_height;
-        this.camera.updateProjectionMatrix();
+        var plotarea = get_bqplot_012_plotarea(fig);
+        this.render_webgl_mark(fig.renderer, this.camera, plotarea.width, plotarea.height);
+    }
+
+    render_bqplot_013_webgl() {
+        var fig = this.parent;
+        var plotarea = get_bqplot_013_plotarea(fig);
+        this.render_webgl_mark(fig.extras.webGLRenderer.renderer, fig.extras.webGLRenderer.camera, plotarea.width, plotarea.height);
+    }
+
+    render_webgl_mark(renderer, camera, plotarea_width, plotarea_height) {
+        camera.left = 0;
+        camera.right = plotarea_width;
+        camera.bottom = 0;
+        camera.top = plotarea_height;
+        camera.updateProjectionMatrix();
 
         const x_scale = this.scales.x ? this.scales.x : this.parent.scale_x;
         const y_scale = this.scales.y ? this.scales.y : this.parent.scale_y;
         const range_x = this.parent.padded_range('x', x_scale.model);
         const range_y = this.parent.padded_range('y', y_scale.model);
         this.uniforms[`range_x`].value = range_x;
-        this.uniforms['resolution'].value = [fig.plotarea_width, fig.plotarea_height];
+        this.uniforms['resolution'].value = [plotarea_width, plotarea_height];
         this.uniforms[`range_y`].value = [range_y[1], range_y[0]]; // flipped coordinates in WebGL
         // every line cleans the depth buffer, since we have to draw with depthFunc: THREE.LessDepth
         // if we don't do this, we will not overdraw on other lines
         // A possible alternative would be to give each mark a z value according to index in Figure.marks
         renderer.clearDepth();
-        renderer.render(this.scene, this.camera);
+        renderer.render(this.scene, camera);
     }
 
     update_scene(animate) {
-        this.parent.update_gl();
+        request_webgl_render(this);
     }
 
     relayout() {

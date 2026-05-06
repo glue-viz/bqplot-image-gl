@@ -8,25 +8,17 @@ var d3 = require("d3");
 var bqplot = require('bqplot');
 var THREE = require('three');
 var {colorRange, computeAndSetDomain, delDomain, setRange} = require('./utils');
+var {
+    ensure_bqplot_013_webgl_figure,
+    get_bqplot_012_plotarea,
+    get_bqplot_013_plotarea,
+    request_webgl_render,
+} = require("./compat");
 
 var interpolations = {'nearest': THREE.NearestFilter, 'bilinear': THREE.LinearFilter};
 
 var jupyter_dataserializers = require("jupyter-dataserializers");
 var serialize = require("./serialize");
-
-function loadBqplotGL() {
-    var amdRequire = typeof window !== "undefined" && (window.requirejs || window.require);
-    if(amdRequire) {
-        return new Promise((resolve, reject) => {
-        amdRequire(["bqplot-gl"], resolve, () => {
-            reject(new Error("bqplot-image-gl with bqplot 0.13 requires bqplot-gl. Install and enable bqplot-gl, or use bqplot 0.12."));
-        });
-    });
-    }
-    return import("bqplot-gl").catch(() => {
-        throw new Error("bqplot-image-gl with bqplot 0.13 requires bqplot-gl. Install and enable bqplot-gl, or use bqplot 0.12.");
-    });
-}
 
 class ImageGLModel extends bqplot.MarkModel {
 
@@ -191,7 +183,7 @@ class ImageGLView extends bqplot.Mark {
         this.scene = new THREE.Scene();
         this.scene.add(this.image_mesh);
 
-        return base_render_promise.then(() => this.initialize_webgl_compat()).then(() => {
+        return base_render_promise.then(() => ensure_bqplot_013_webgl_figure(this)).then(() => {
             this.create_listeners();
             this.update_minmax();
             this.update_colormap();
@@ -203,31 +195,6 @@ class ImageGLView extends bqplot.Mark {
                 this.draw();
             });
         });
-    }
-
-    initialize_webgl_compat() {
-        var fig = this.parent;
-        if(fig.extras && fig.extras.webGLRequestRender) {
-            this.register_webgl_mark();
-            return Promise.resolve();
-        }
-        if(fig.update_gl && fig.createWebGLRenderer) {
-            return Promise.resolve();
-        }
-        return loadBqplotGL().then((bqplot_gl) => {
-            if(!bqplot_gl.initializeBqplotFigure) {
-                throw new Error("bqplot-gl did not export initializeBqplotFigure.");
-            }
-            bqplot_gl.initializeBqplotFigure(fig);
-            this.register_webgl_mark();
-        });
-    }
-
-    register_webgl_mark() {
-        var marks = this.parent.extras && this.parent.extras.webGLMarks;
-        if(marks && !marks.includes(this)) {
-            marks.push(this);
-        }
     }
 
     set_positional_scales() {
@@ -410,31 +377,31 @@ class ImageGLView extends bqplot.Mark {
     }
 
     update_scene(animate) {
-        if(this.parent.extras && this.parent.extras.webGLRequestRender) {
-            this.parent.extras.webGLRequestRender();
-        } else {
-            this.parent.update_gl();
-        }
+        request_webgl_render(this);
     }
 
-    render_gl() {
+    render_bqplot_012_webgl() {
         var fig = this.parent;
-        var renderer = fig.extras && fig.extras.webGLRenderer ?
-            fig.extras.webGLRenderer.renderer :
-            fig.renderer;
-        var image = this.model.get("image");
+        var plotarea = get_bqplot_012_plotarea(fig);
+        this.render_webgl_mark(fig.renderer, this.camera, plotarea.width, plotarea.height);
+    }
 
+    render_bqplot_013_webgl() {
+        var fig = this.parent;
+        var plotarea = get_bqplot_013_plotarea(fig);
+        this.render_webgl_mark(fig.extras.webGLRenderer.renderer, this.camera, plotarea.width, plotarea.height);
+    }
+
+    render_webgl_mark(renderer, camera, plotarea_width, plotarea_height) {
         var x_scale = this.scales.x ? this.scales.x : this.parent.scale_x;
         var y_scale = this.scales.y ? this.scales.y : this.parent.scale_y;
 
         // set the camera such that we work in pixel coordinates
-        var plotarea_width = fig.plotareaWidth !== undefined ? fig.plotareaWidth : fig.plotarea_width;
-        var plotarea_height = fig.plotareaHeight !== undefined ? fig.plotareaHeight : fig.plotarea_height;
-        this.camera.left  = 0;
-        this.camera.right = plotarea_width;
-        this.camera.bottom = 0;
-        this.camera.top = plotarea_height;
-        this.camera.updateProjectionMatrix();
+        camera.left  = 0;
+        camera.right = plotarea_width;
+        camera.bottom = 0;
+        camera.top = plotarea_height;
+        camera.updateProjectionMatrix();
 
         var x = this.model.get('x');
         var y = this.model.get('y');
@@ -457,12 +424,16 @@ class ImageGLView extends bqplot.Mark {
         this.image_material.uniforms.image_domain_x.value = [x0, x1];
         this.image_material.uniforms.image_domain_y.value = [y0, y1];
 
-        renderer.render(this.scene, this.camera);
+        renderer.render(this.scene, camera);
         var canvas = renderer.domElement;
     }
 
+    render_gl() {
+        this.render_bqplot_012_webgl();
+    }
+
     renderGL() {
-        this.render_gl();
+        this.render_bqplot_013_webgl();
     }
 
     relayout() {

@@ -6,14 +6,10 @@ jobs:
     parameters:
       jobname:
         type: string
-      pytest_addopts:
-        type: string
-        default: ""
     docker:
       - image: cimg/python:3.11
     environment:
       TOXENV: << parameters.jobname >>
-      PYTEST_ADDOPTS: << parameters.pytest_addopts >>
     steps:
       - checkout
       - run:

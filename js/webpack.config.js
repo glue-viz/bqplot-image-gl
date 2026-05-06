@@ -14,6 +14,12 @@ var widgetExternals = {
     'bqplot-gl': 'bqplot-gl',
 };
 
+var classicResolve = {
+    alias: {
+        './bqplot-gl-loader': path.resolve(__dirname, 'lib/bqplot-gl-loader-classic.js'),
+    },
+};
+
 
 module.exports = [
     {// Notebook extension
@@ -51,6 +57,7 @@ module.exports = [
         module: {
             rules: rules
         },
+        resolve: classicResolve,
         externals: widgetExternals
     },
     {// Embeddable bqplot-image-gl bundle
@@ -79,6 +86,7 @@ module.exports = [
         module: {
             rules: rules
         },
+        resolve: classicResolve,
         externals: widgetExternals
     }
 ];
