@@ -16,13 +16,15 @@ var serialize = require("./serialize");
 
 function loadBqplotGL() {
     var amdRequire = typeof window !== "undefined" && (window.requirejs || window.require);
-    if(!amdRequire) {
-        return Promise.reject(new Error("bqplot-image-gl with bqplot 0.13 requires the bqplot-gl frontend module, but no AMD loader is available."));
-    }
-    return new Promise((resolve, reject) => {
+    if(amdRequire) {
+        return new Promise((resolve, reject) => {
         amdRequire(["bqplot-gl"], resolve, () => {
             reject(new Error("bqplot-image-gl with bqplot 0.13 requires bqplot-gl. Install and enable bqplot-gl, or use bqplot 0.12."));
         });
+    });
+    }
+    return import("bqplot-gl").catch(() => {
+        throw new Error("bqplot-image-gl with bqplot 0.13 requires bqplot-gl. Install and enable bqplot-gl, or use bqplot 0.12.");
     });
 }
 
@@ -210,7 +212,6 @@ class ImageGLView extends bqplot.Mark {
             return Promise.resolve();
         }
         if(fig.update_gl && fig.createWebGLRenderer) {
-            fig.createWebGLRenderer();
             return Promise.resolve();
         }
         return loadBqplotGL().then((bqplot_gl) => {

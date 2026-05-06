@@ -11,6 +11,7 @@ var rules = [
 var widgetExternals = {
     '@jupyter-widgets/base': '@jupyter-widgets/base',
     'bqplot': 'bqplot',
+    'bqplot-gl': 'bqplot-gl',
 };
 
 

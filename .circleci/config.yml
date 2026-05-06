@@ -44,9 +44,6 @@ workflows:
       - visual:
           name: py311-bqplot012-visual
           jobname: py311-bqplot012-visual
-          # TODO: re-enable the JupyterLab runner once the bqplot 0.12
-          # compatibility path works there again.
-          pytest_addopts: '-k "not jupyter_lab"'
       - visual:
           name: py311-bqplot013-visual
           jobname: py311-bqplot013-visual
