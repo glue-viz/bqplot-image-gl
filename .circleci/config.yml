@@ -38,8 +38,8 @@ workflows:
   visual-tests:
     jobs:
       - visual:
-          name: << matrix.jobname >>
-          matrix:
-            parameters:
-              jobname:
-                - "py311-visual"
+          name: py311-bqplot012-visual
+          jobname: py311-bqplot012-visual
+      - visual:
+          name: py311-bqplot013-visual
+          jobname: py311-bqplot013-visual

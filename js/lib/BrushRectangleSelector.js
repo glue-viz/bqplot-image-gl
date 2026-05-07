@@ -11,7 +11,7 @@ const BaseXYSelector = __importStar(require("bqplot")).BaseXYSelector;
 const d3 = require("d3");
 const d3_drag_1 = require("d3-drag");
 const d3Selection = require("d3-selection");
-const { applyStyles } = require("./utils");
+const { applyStyles, setRange } = require("./utils");
 const d3GetEvent = function () { return require("d3-selection").event; }.bind(this);
 
 class BrushRectangleSelector extends BaseXYSelector {
@@ -189,8 +189,8 @@ class BrushRectangleSelector extends BaseXYSelector {
     }
     relayout() {
         super.relayout();
-        this.x_scale.set_range(this.parent.padded_range("x", this.x_scale.model));
-        this.y_scale.set_range(this.parent.padded_range("y", this.y_scale.model));
+        setRange(this.x_scale, this.parent.padded_range("x", this.x_scale.model));
+        setRange(this.y_scale, this.parent.padded_range("y", this.y_scale.model));
         // Called when the figure margins are updated.
         this.eventElement
             .attr("width", this.parent.width -

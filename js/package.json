@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0-rc.4 || ^4.0.0",
+    "bqplot-gl": "^0.1.0",
     "npm-run-all": "^4.1.5",
     "raw-loader": "^4",
     "rimraf": "^6.1.3",
@@ -41,7 +42,7 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.0.0 || ^2.0.0 || ^3.0.0 || ^4 || ^6",
-    "bqplot": "^0.5.3",
+    "bqplot": "^0.5.3 || ^0.6.0",
     "d3": "^5.7.0",
     "d3-color": "^3.1.0",
     "d3-contour": "^4.0.2",
@@ -53,6 +54,14 @@
     "patch-package": "^8.0.1",
     "three": "^0.97.0"
   },
+  "peerDependencies": {
+    "bqplot-gl": ">=0.1.0 <0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "bqplot-gl": {
+      "optional": true
+    }
+  },
   "jupyterlab": {
     "extension": "lib/labplugin",
     "outputDir": "../bqplot_image_gl/labextension",
@@ -62,6 +71,10 @@
         "singleton": true
       },
       "bqplot": {
+        "bundled": false,
+        "singleton": true
+      },
+      "bqplot-gl": {
         "bundled": false,
         "singleton": true
       },

@@ -8,6 +8,18 @@ var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']}
 ]
 
+var widgetExternals = {
+    '@jupyter-widgets/base': '@jupyter-widgets/base',
+    'bqplot': 'bqplot',
+    'bqplot-gl': 'bqplot-gl',
+};
+
+var classicResolve = {
+    alias: {
+        './bqplot-gl-loader': path.resolve(__dirname, 'lib/bqplot-gl-loader-classic.js'),
+    },
+};
+
 
 module.exports = [
     {// Notebook extension
@@ -45,7 +57,8 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base', 'bqplot']
+        resolve: classicResolve,
+        externals: widgetExternals
     },
     {// Embeddable bqplot-image-gl bundle
      //
@@ -73,6 +86,7 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base', 'bqplot']
+        resolve: classicResolve,
+        externals: widgetExternals
     }
 ];
