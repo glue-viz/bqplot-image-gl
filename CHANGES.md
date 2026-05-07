@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.10.0 - 2026-05-07
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+* Fix support with bqplot 0.13 by @maartenbreddels in https://github.com/glue-viz/bqplot-image-gl/pull/186
+
+**Full Changelog**: https://github.com/glue-viz/bqplot-image-gl/compare/v1.9.2...v1.10.0
+
 ## v1.9.2 - 2026-04-21
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
