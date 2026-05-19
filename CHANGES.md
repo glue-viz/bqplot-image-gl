@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.10.1 - 2026-05-19
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Other Changes
+
+* [codex] restore bqplot 0.13 Lab 3 coverage and require bqplot-gl 0.1.1 by @maartenbreddels in https://github.com/glue-viz/bqplot-image-gl/pull/187
+
+**Full Changelog**: https://github.com/glue-viz/bqplot-image-gl/compare/v1.10.0...v1.10.1
+
 ## v1.10.0 - 2026-05-07
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
