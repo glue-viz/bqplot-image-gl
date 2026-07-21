@@ -1,5 +1,8 @@
 /*jshint esversion: 6 */
 
+// Must run before any mark view creates three.js objects.
+import "./three-id-offset.js";
+
 // Export widget models and views, and the npm package version number.
 export * from "./imagegl.js";
 export * from "./linesgl.js";
