@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.10.2 - 2026-07-21
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+* Avoid geometry id collisions with bqplot's copy of three.js by @astrofrog in https://github.com/glue-viz/bqplot-image-gl/pull/200 - this fixes issues where scatter plots in glue sometimes did now show markers the first time a cell was run
+
+**Full Changelog**: https://github.com/glue-viz/bqplot-image-gl/compare/v1.10.1...v1.10.2
+
 ## v1.10.1 - 2026-05-19
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
