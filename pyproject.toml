@@ -102,5 +102,9 @@ markers = [
     "mpl_image_compare",
 ]
 
+[tool.ruff.lint]
+# Keep the rule set that was the default before ruff 0.16 expanded the defaults
+select = ["E4", "E7", "E9", "F"]
+
 [tool.ruff.lint.per-file-ignores]
 "ui-tests/jupyter_server_config.py" = ["F821"]
