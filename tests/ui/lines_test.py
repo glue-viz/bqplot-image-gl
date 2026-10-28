@@ -68,3 +68,36 @@ def test_widget_lines_two(
     svg.wait_for()
     page_session.wait_for_timeout(100)
     return svg.screenshot()
+
+
+@visual_ui_test(filename="test_widget_lines_chromium.png")
+def test_widget_lines_hidden(
+    solara_test,
+    page_session: playwright.sync_api.Page,
+):
+    # A line that is already hidden when the view is created should not be
+    # drawn, so the figure should look exactly like test_widget_lines.
+    from bqplot import Figure, LinearScale, Axis
+    from bqplot_image_gl import LinesGL
+
+    scale_x = LinearScale(min=0, max=1)
+    scale_y = LinearScale(min=-1, max=1)
+    scales = {"x": scale_x, "y": scale_y}
+    axis_x = Axis(scale=scale_x, label="x")
+    axis_y = Axis(scale=scale_y, label="y", orientation="vertical")
+
+    x = np.linspace(0, 1, 200)
+
+    line = LinesGL(x=x, y=np.sin(4 * np.pi * x), scales=scales, colors=["orange"])
+    hidden = LinesGL(
+        x=x, y=np.cos(4 * np.pi * x), scales=scales, colors=["steelblue"], visible=False
+    )
+
+    figure = Figure(scales=scales, axes=[axis_x, axis_y], marks=[line, hidden])
+
+    display(figure)
+
+    svg = page_session.locator(".bqplot")
+    svg.wait_for()
+    page_session.wait_for_timeout(100)
+    return svg.screenshot()

@@ -112,6 +112,7 @@ class LinesGLView extends bqplot.Lines {
             this.update_scene();
         };
         this.listenTo(this.model, "change:visible", sync_visible , this);
+        sync_visible();
     }
 
     _updateGeometry() {
