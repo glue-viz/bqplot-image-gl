@@ -2,6 +2,9 @@ rules:
   cache-poisoning:
     ignore:
       - ci.yml
+  dangerous-triggers:
+    ignore:
+      - update_baseline_images.yaml
   use-trusted-publishing:
     ignore:
       - ci.yml
